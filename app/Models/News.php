@@ -26,7 +26,6 @@ class News extends Model
         'updated_at',
         'news_status',
         'sub_topic_id',
-        'author_id'
     ];
     public function sub_topics()
     {
