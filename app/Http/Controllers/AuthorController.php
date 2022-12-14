@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Authors;
+use Illuminate\Support\Facades\URL;
 use App\Models\AdminApproval;
 use App\Models\User;
+
 
 class AuthorController extends Controller
 {
@@ -35,15 +36,22 @@ class AuthorController extends Controller
     public function approve(Request $request, $id)
     {
         $date_now = round(microtime(true) * 1000);
-        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id", "join_at")->get();
+        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id")->get();
         $json_decode_approval = json_decode($admin_approval_user_id);
         $user_id_from_admin_approval = $json_decode_approval[0]->id;
-
+        $image_file = $request->file("image_file");
+        $extension = $image_file->getExtension();
+        $file_name = $image_file->getClientOriginalName();
+        $file_name_ = explode(".", $file_name);
+        $without_extension = $file_name[0];
+        $directory = "storage/photo_profile";
+        $url = URL::to('');
+        $image_url_directory = stripslashes($url . "/" . $directory . "/" . $file_name);
         $data_author = array(
             "author_description" => $request->author_description,
-            "created_at" => $date_now,
-            "user_id" => $id
-
+            "role" => "Author",
+            "photo_profile_link" => $image_url_directory,
+            "photo_proile_name" => $file_name,
         );
         $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
         $delete_admin_approval->dlete();

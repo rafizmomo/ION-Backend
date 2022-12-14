@@ -19,6 +19,8 @@ class AdminApproval extends Model
 
     protected $fillable = [
         'author_description',
+        'photo_profile_link',
+        'photo_profile_name',
         'join_at',
         'user_id',
     ];
