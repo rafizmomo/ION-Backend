@@ -108,8 +108,7 @@ class NewsController extends Controller
     public function showNewsBySubTopicsAndTopics()
     {
         DB::enableQueryLog();
-        
-        $topics = Topics::select("id")->get();
+        $$topics = Topics::select("id")->get();
         $decode_topics = json_decode($topics);
         $array_decode_topics = array();
         for ($i = 0; $i < sizeof($decode_topics); $i++) {

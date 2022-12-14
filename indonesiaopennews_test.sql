@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 13 Des 2022 pada 16.29
+-- Waktu pembuatan: 14 Des 2022 pada 02.51
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -60,28 +60,8 @@ CREATE TABLE `authors` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `author_description` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `join_at` bigint(20) UNSIGNED NOT NULL,
+  `balance` double UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `authors`
---
-
-INSERT INTO `authors` (`id`, `author_description`, `join_at`, `user_id`) VALUES
-(3, 'My name is blabalbala', 1670855790704, 5);
-
--- --------------------------------------------------------
-
---
--- Struktur dari tabel `authors_receiving_money_account`
---
-
-CREATE TABLE `authors_receiving_money_account` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `balance` decimal(8,2) UNSIGNED NOT NULL,
-  `create_at` bigint(20) UNSIGNED NOT NULL,
-  `updated_at` bigint(20) UNSIGNED NOT NULL,
-  `user_balance_id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -126,8 +106,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (7, '2022_09_01_072345_create_authors_table', 1),
 (8, '2022_09_01_072347_create_news_table', 1),
 (9, '2022_09_01_082833_create_admins_table', 1),
-(10, '2022_09_27_071653_authors_receving_money_account', 1),
-(16, '2022_12_12_072635_admin_approval', 2);
+(10, '2022_12_12_072635_admin_approval', 1);
 
 -- --------------------------------------------------------
 
@@ -144,18 +123,10 @@ CREATE TABLE `news` (
   `news_picture_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `added_at` bigint(20) UNSIGNED NOT NULL,
   `updated_at` bigint(20) UNSIGNED NOT NULL,
+  `news_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `sub_topic_id` bigint(20) UNSIGNED DEFAULT NULL,
   `author_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `news`
---
-
-INSERT INTO `news` (`id`, `news_title`, `news_content`, `news_slug`, `news_picture_link`, `news_picture_name`, `added_at`, `updated_at`, `sub_topic_id`, `author_id`) VALUES
-(3, 'test', 'oye', '0', 'http://127.0.0.1:8000/storage/01.JPG', '01.JPG', 1670918466624, 0, 16, 3),
-(4, 'Hello World', 'oye', 'hello-world', 'http://127.0.0.1:8000/storage/01.JPG', '01.JPG', 1670932203568, 0, 16, 3),
-(5, 'Hello World 1', 'oye', 'hello-world-1', 'http://127.0.0.1:8000/storage/01.JPG', '01.JPG', 1670932767406, 0, 18, 3);
 
 -- --------------------------------------------------------
 
@@ -203,14 +174,6 @@ CREATE TABLE `sub_topics` (
   `topic_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data untuk tabel `sub_topics`
---
-
-INSERT INTO `sub_topics` (`id`, `sub_topic_title`, `sub_topic_slug`, `added_at`, `updated_at`, `topic_id`) VALUES
-(16, 'Test Jnjj', 'test-jnjj', 1670899934742, 0, 1),
-(18, 'Aku Bingung', 'aku-bingung', 1670928395714, 0, 2);
-
 -- --------------------------------------------------------
 
 --
@@ -224,14 +187,6 @@ CREATE TABLE `topics` (
   `added_at` bigint(20) UNSIGNED NOT NULL,
   `updated_at` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `topics`
---
-
-INSERT INTO `topics` (`id`, `topic_title`, `topic_slug`, `added_at`, `updated_at`) VALUES
-(1, 'Olahraga Air', 'olahraga-air', 1670897292392, 0),
-(2, 'Test Again', 'test-again', 1670927614029, 0);
 
 -- --------------------------------------------------------
 
@@ -249,13 +204,6 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `users`
---
-
-INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(5, 'Jooshua', 'joshuatheo6@gmail.com', NULL, '$2y$10$gegq.aimO8FtCVkHjgK8Ze3B9GuvirvqbpPT0aRGneHBOGQXSoqbq', NULL, '2022-12-11 20:44:41', '2022-12-11 20:44:41');
 
 --
 -- Indexes for dumped tables
@@ -282,13 +230,6 @@ ALTER TABLE `admin_approval`
 ALTER TABLE `authors`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `user_id_unique` (`user_id`);
-
---
--- Indeks untuk tabel `authors_receiving_money_account`
---
-ALTER TABLE `authors_receiving_money_account`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_balance_id_unique` (`user_balance_id`);
 
 --
 -- Indeks untuk tabel `failed_jobs`
@@ -362,18 +303,12 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `authors`
 --
 ALTER TABLE `authors`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT untuk tabel `authors_receiving_money_account`
---
-ALTER TABLE `authors_receiving_money_account`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -386,13 +321,13 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT untuk tabel `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT untuk tabel `news`
 --
 ALTER TABLE `news`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `personal_access_tokens`
@@ -404,19 +339,19 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT untuk tabel `sub_topics`
 --
 ALTER TABLE `sub_topics`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `topics`
 --
 ALTER TABLE `topics`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
@@ -439,12 +374,6 @@ ALTER TABLE `admin_approval`
 --
 ALTER TABLE `authors`
   ADD CONSTRAINT `authors_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Ketidakleluasaan untuk tabel `authors_receiving_money_account`
---
-ALTER TABLE `authors_receiving_money_account`
-  ADD CONSTRAINT `authors_receiving_money_account_user_balance_id_foreign` FOREIGN KEY (`user_balance_id`) REFERENCES `authors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `news`

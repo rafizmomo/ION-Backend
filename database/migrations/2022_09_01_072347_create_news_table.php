@@ -25,13 +25,12 @@ return new class extends Migration
             $table->string("news_picture_name", 50);
             $table->bigInteger("added_at", false, true);
             $table->bigInteger("updated_at", false, true);
-            $table->string("period", 15);
+            $table->string("news_status");
             $table->unsignedBigInteger("sub_topic_id", false)->nullable(true);
             $table->foreign("sub_topic_id")->references("id")->on("sub_topics")->onUpdate("cascade")->onDelete("set null");
             $table->unsignedBigInteger("author_id", false)->nullable(true);
             $table->foreign("author_id")->references("id")->on("authors")->onUpdate("cascade")->onDelete("cascade");
         });
-        // DB::statement("ALTER TABLE news ADD new_picture LONGBLOB");
     }
 
     /**
