@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('admin_news_approval', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("user_id", false);
-            $table->timestamps();
+            $table->string("news_title");
+            $table->string("news_content");
             $table->foreign("user_id")->references("id")->on("users");
         });
     }
