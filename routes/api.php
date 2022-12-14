@@ -54,12 +54,14 @@ Route::post("/author", [AuthorController::class, "store"]);
 Route::get("/user", [UserController::class, "getAllUser"]);
 Route::post("/logout", [AuthController::class, "signout"]);
 
-// Admin Approval Routes
+// Admin Approval Route
 Route::get("/adminapproval", [AdminApprovalController::class, "listAdminApproval"]);
-Route::post("/adminapproval", [AdminApprovalController::class, "makeApproval"]);
+Route::post("/adminapproval/{id}", [AdminApprovalController::class, "makeApproval"]);
 Route::prefix("adminapproval")->group(function () {
     route::post("/approve/{id}", [AuthorController::class, "approve"]);
     route::post("/reject", [AuthorController::class, "reject"]);
 });
+
+Route::get("/shownewsforadminreview", [NewsController::class, "showNewsForAdminReview"]);
 Route::middleware("auth:sanctum")->group(function () {
 });

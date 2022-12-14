@@ -51,6 +51,13 @@ class NewsController extends Controller
         return response()->join($news);
     }
 
+    public function showNewsForAdminReview()
+    {
+        $news = DB::table("news")->join("authors", "authors.id", "=", "news.author_id")
+            // ->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
+            ->select("news.*", "authors.*")->get();
+        return response()->json($news, 200);
+    }
 
     /**
      * @param \Illuminate\Http\Request $request
@@ -113,7 +120,8 @@ class NewsController extends Controller
     }
 
     // For home page in topic_home, visitor
-    public function showNewsByTopic($id)
+    public function
+    showNewsByTopic($id)
     {
         DB::enableQueryLog();
         $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
@@ -155,10 +163,5 @@ class NewsController extends Controller
     {
         $news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")->where("news.sub_topic_id", $id)->select("news.*", "sub_topics.sub_topic_title")->get();
         return response()->json(["news" => $news], 200);
-    }
-
-
-    public function show($id)
-    {
     }
 }

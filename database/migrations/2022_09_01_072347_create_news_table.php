@@ -28,8 +28,8 @@ return new class extends Migration
             $table->string("news_status");
             $table->unsignedBigInteger("sub_topic_id", false)->nullable(true);
             $table->foreign("sub_topic_id")->references("id")->on("sub_topics")->onUpdate("cascade")->onDelete("set null");
-            $table->unsignedBigInteger("author_id", false)->nullable(true);
-            $table->foreign("author_id")->references("id")->on("authors")->onUpdate("cascade")->onDelete("cascade");
+            $table->unsignedBigInteger("user_id", false)->nullable();
+            $table->foreign("user_id")->references("id")->on("users")->onUpdate("cascade")->onDelete("cascade");
         });
     }
 

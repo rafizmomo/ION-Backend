@@ -5,22 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\AdminApproval;
+use App\Models\User;
 
 class AdminApprovalController extends Controller
 {
-    public function makeApproval(Request $request)
+    public function makeApproval(Request $request, $id)
     {
         $date_now = round(microtime(true) * 1000);
         $response = null;
         // $author_description = ucwords($request->input("author_description"));
-        $id = $request->input("user_id");
         $author_description = $request->author_description;
         $author_data = array(
             "author_description" => $author_description,
             "join_at" => $date_now,
             "user_id" => $id,
         );
-        if (AdminApproval::where("user_id", $id)->first() == null) {
+        if (AdminApproval::where("user_id", $id)->first() == null  && User::where("id", $id)->first() == null) {
             AdminApproval::create($author_data);
             $response = response()->json(["authors" => $author_data, "status" => "Success", "message" => "You have signigned to join as author. Please wait until approved"], 201);
         } else {
