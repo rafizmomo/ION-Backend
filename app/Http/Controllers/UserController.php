@@ -19,7 +19,7 @@ class UserController extends Controller
         $user_data = array(
             "name" => ucwords($request->name),
             "email" => $request->email,
-            "password" => bcrypt($request->password),
+            "password" => $request->password,
         );
         if ($validator->fails()) {
             $response =  response()->json(["status" => "Fail", "message" => $validator->errors()], 422);

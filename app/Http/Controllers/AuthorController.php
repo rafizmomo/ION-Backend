@@ -35,17 +35,21 @@ class AuthorController extends Controller
     public function approve(Request $request, $id)
     {
         $date_now = round(microtime(true) * 1000);
-        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id")->get();
+        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id", "join_at")->get();
         $json_decode_approval = json_decode($admin_approval_user_id);
         $user_id_from_admin_approval = $json_decode_approval[0]->id;
+
         $data_author = array(
             "author_description" => $request->author_description,
-            "join_at" => $date_now,
+            "created_at" => $date_now,
             "user_id" => $id
+
         );
         $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
-        $delete_admin_approval->delete();
-        return response()->json(["authors" => Authors::create($data_author), "status" => "Success", "message" => "Author has created"], 201);
+        $delete_admin_approval->dlete();
+        $create_author_role = User::findOrFail($id);
+        $create_author_role->update();
+        return response()->json(["authors", "status" => "Success", "message" => "Author has created"], 201);
     }
 
     public function reject(Request $request)

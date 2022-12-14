@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string("author_description");
-            $table->string("role");
+            $table->string("author_description")->nullable();
+            $table->string("role")->nullable();
             $table->unsignedDouble("balance")->nullable();
+            $table->string("photo_profile_link", 150)->nullable();
+            $table->string("photo_profile_name", 150)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
