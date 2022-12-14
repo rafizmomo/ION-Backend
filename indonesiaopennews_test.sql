@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 14 Des 2022 pada 09.48
+-- Waktu pembuatan: 14 Des 2022 pada 12.18
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -30,9 +30,18 @@ SET time_zone = "+00:00";
 CREATE TABLE `admin_approval` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `author_description` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `photo_profile_link` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `photo_profile_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `join_at` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `admin_approval`
+--
+
+INSERT INTO `admin_approval` (`id`, `author_description`, `photo_profile_link`, `photo_profile_name`, `join_at`, `user_id`) VALUES
+(13, 'My name is blala', 'http://127.0.0.1:8000/storage/photo_profile/01.JPG', '01.JPG', 1671010987570, 1);
 
 -- --------------------------------------------------------
 
@@ -206,6 +215,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Dumping data untuk tabel `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `author_description`, `role`, `balance`, `photo_profile_link`, `photo_profile_name`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Joshua Theo', 'joshuatheo196@gmail.com', 'joshuatheo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2022-12-14 02:11:26', '2022-12-14 02:11:26');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -296,7 +312,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT untuk tabel `admin_news_approval`
@@ -350,7 +366,7 @@ ALTER TABLE `topics`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
