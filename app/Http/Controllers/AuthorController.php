@@ -32,16 +32,16 @@ class AuthorController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function approve(Request $request)
+    public function approve(Request $request, $id)
     {
         $date_now = round(microtime(true) * 1000);
-        $admin_approval_user_id = AdminApproval::where("user_id", intval($request->user_id))->select("id")->get();
+        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id")->get();
         $json_decode_approval = json_decode($admin_approval_user_id);
         $user_id_from_admin_approval = $json_decode_approval[0]->id;
         $data_author = array(
             "author_description" => $request->author_description,
             "join_at" => $date_now,
-            "user_id" => $request->user_id
+            "user_id" => $id
         );
         $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
         $delete_admin_approval->delete();
@@ -58,9 +58,6 @@ class AuthorController extends Controller
         $delete_admin_approval->delete();
         return response()->json(["admin_approval" => $delete_admin_approval, "status" => "Success", "You have rejected to create an author account"], 202);
     }
-
-
-
 
     /**
      * Display the specified resource.

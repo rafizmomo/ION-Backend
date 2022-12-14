@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Route;
  * @method "POST"
  */
 Route::post('/login', App\Http\Controllers\LoginController::class)->name('login');
+Route::post('/register', [UserController::class, "signup"]);
 // Route::post("/login", [AuthController::class, "signin"]);
 
 Route::get("/", [NewsController::class, "showNewsByTopics"]);
@@ -34,7 +35,7 @@ Route::get("/sub/{id}", [NewsController::class, "showNewsBySubTopic"]);
 
 // News Routes
 Route::post("/news", [NewsController::class, "store"]);
-Route::get("/news", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
+Route::get("/shownewsbytopic/{id}", [NewsController::class, "showNewsByTopic"]);
 Route::get("/news/{id}", [NewsController::class, "show"]);
 Route::get("/news/search", [NewsController::class, "index"]);
 
@@ -57,7 +58,7 @@ Route::post("/logout", [AuthController::class, "signout"]);
 Route::get("/adminapproval", [AdminApprovalController::class, "listAdminApproval"]);
 Route::post("/adminapproval", [AdminApprovalController::class, "makeApproval"]);
 Route::prefix("adminapproval")->group(function () {
-    route::post("/approve", [AuthorController::class, "approve"]);
+    route::post("/approve/{id}", [AuthorController::class, "approve"]);
     route::post("/reject", [AuthorController::class, "reject"]);
 });
 Route::middleware("auth:sanctum")->group(function () {

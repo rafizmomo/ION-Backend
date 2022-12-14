@@ -24,6 +24,7 @@ class News extends Model
         'news_picture_name',
         'added_at',
         'updated_at',
+        'news_status',
         'sub_topic_id',
         'author_id'
     ];

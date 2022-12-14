@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 14 Des 2022 pada 02.51
+-- Waktu pembuatan: 14 Des 2022 pada 03.58
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -60,9 +60,16 @@ CREATE TABLE `authors` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `author_description` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `join_at` bigint(20) UNSIGNED NOT NULL,
-  `balance` double UNSIGNED NOT NULL,
+  `balance` double UNSIGNED DEFAULT NULL,
   `user_id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data untuk tabel `authors`
+--
+
+INSERT INTO `authors` (`id`, `author_description`, `join_at`, `balance`, `user_id`) VALUES
+(1, 'My name is blabalbala', 1670985862347, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -78,6 +85,18 @@ CREATE TABLE `failed_jobs` (
   `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `history`
+--
+
+CREATE TABLE `history` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` datetime NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -106,7 +125,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (7, '2022_09_01_072345_create_authors_table', 1),
 (8, '2022_09_01_072347_create_news_table', 1),
 (9, '2022_09_01_082833_create_admins_table', 1),
-(10, '2022_12_12_072635_admin_approval', 1);
+(10, '2022_12_12_072635_admin_approval', 1),
+(11, '2022_12_14_025009_creaete_history_table', 2);
 
 -- --------------------------------------------------------
 
@@ -123,7 +143,7 @@ CREATE TABLE `news` (
   `news_picture_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `added_at` bigint(20) UNSIGNED NOT NULL,
   `updated_at` bigint(20) UNSIGNED NOT NULL,
-  `news_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `news_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sub_topic_id` bigint(20) UNSIGNED DEFAULT NULL,
   `author_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -206,6 +226,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Dumping data untuk tabel `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'Testttttt', 'test@gmail.com', NULL, '$2y$10$WCnuGXsusmjiSbVlxFKpsO7zGTQMpR9RX2Y686S1LwQjOhrhhuFnC', NULL, '2022-12-13 19:26:52', '2022-12-13 19:26:52');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -237,6 +264,13 @@ ALTER TABLE `authors`
 ALTER TABLE `failed_jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
+
+--
+-- Indeks untuk tabel `history`
+--
+ALTER TABLE `history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `history_user_id_foreign` (`user_id`);
 
 --
 -- Indeks untuk tabel `migrations`
@@ -303,13 +337,13 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `authors`
 --
 ALTER TABLE `authors`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `failed_jobs`
@@ -318,10 +352,16 @@ ALTER TABLE `failed_jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT untuk tabel `history`
+--
+ALTER TABLE `history`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT untuk tabel `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT untuk tabel `news`
@@ -351,7 +391,7 @@ ALTER TABLE `topics`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
@@ -374,6 +414,12 @@ ALTER TABLE `admin_approval`
 --
 ALTER TABLE `authors`
   ADD CONSTRAINT `authors_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Ketidakleluasaan untuk tabel `history`
+--
+ALTER TABLE `history`
+  ADD CONSTRAINT `history_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `news`

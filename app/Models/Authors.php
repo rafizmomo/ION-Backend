@@ -17,6 +17,7 @@ class Authors extends Model
     protected $fillable = [
         "author_description",
         "join_at",
+        "balance",
         "user_id"
     ];
 }
