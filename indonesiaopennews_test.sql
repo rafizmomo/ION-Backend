@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 14 Des 2022 pada 03.58
+-- Waktu pembuatan: 14 Des 2022 pada 04.50
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -24,22 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `admins`
---
-
-CREATE TABLE `admins` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` bigint(20) UNSIGNED NOT NULL,
-  `update_at` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Struktur dari tabel `admin_approval`
 --
 
@@ -53,23 +37,15 @@ CREATE TABLE `admin_approval` (
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `authors`
+-- Struktur dari tabel `admin_news_approval`
 --
 
-CREATE TABLE `authors` (
+CREATE TABLE `admin_news_approval` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `author_description` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `join_at` bigint(20) UNSIGNED NOT NULL,
-  `balance` double UNSIGNED DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `authors`
---
-
-INSERT INTO `authors` (`id`, `author_description`, `join_at`, `balance`, `user_id`) VALUES
-(1, 'My name is blabalbala', 1670985862347, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -122,11 +98,10 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (4, '2019_12_14_000001_create_personal_access_tokens_table', 1),
 (5, '2022_09_01_072341_create_topics_table', 1),
 (6, '2022_09_01_072342_create_subtopics_table', 1),
-(7, '2022_09_01_072345_create_authors_table', 1),
-(8, '2022_09_01_072347_create_news_table', 1),
-(9, '2022_09_01_082833_create_admins_table', 1),
-(10, '2022_12_12_072635_admin_approval', 1),
-(11, '2022_12_14_025009_creaete_history_table', 2);
+(7, '2022_09_01_072347_create_news_table', 1),
+(8, '2022_12_12_072635_admin_approval', 1),
+(9, '2022_12_14_025009_creaete_history_table', 1),
+(10, '2022_12_14_034028_create_admin_news_approval_table', 1);
 
 -- --------------------------------------------------------
 
@@ -143,9 +118,9 @@ CREATE TABLE `news` (
   `news_picture_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `added_at` bigint(20) UNSIGNED NOT NULL,
   `updated_at` bigint(20) UNSIGNED NOT NULL,
-  `news_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `news_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `sub_topic_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `author_id` bigint(20) UNSIGNED DEFAULT NULL
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -220,29 +195,16 @@ CREATE TABLE `users` (
   `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `balance` double UNSIGNED DEFAULT NULL,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data untuk tabel `users`
---
-
-INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Testttttt', 'test@gmail.com', NULL, '$2y$10$WCnuGXsusmjiSbVlxFKpsO7zGTQMpR9RX2Y686S1LwQjOhrhhuFnC', NULL, '2022-12-13 19:26:52', '2022-12-13 19:26:52');
-
---
 -- Indexes for dumped tables
 --
-
---
--- Indeks untuk tabel `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `admins_email_unique` (`email`),
-  ADD KEY `admins_user_id_foreign` (`user_id`);
 
 --
 -- Indeks untuk tabel `admin_approval`
@@ -252,11 +214,11 @@ ALTER TABLE `admin_approval`
   ADD KEY `admin_approval_user_id_foreign` (`user_id`);
 
 --
--- Indeks untuk tabel `authors`
+-- Indeks untuk tabel `admin_news_approval`
 --
-ALTER TABLE `authors`
+ALTER TABLE `admin_news_approval`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id_unique` (`user_id`);
+  ADD KEY `admin_news_approval_user_id_foreign` (`user_id`);
 
 --
 -- Indeks untuk tabel `failed_jobs`
@@ -285,7 +247,7 @@ ALTER TABLE `news`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `news_news_title_unique` (`news_title`),
   ADD KEY `news_sub_topic_id_foreign` (`sub_topic_id`),
-  ADD KEY `news_author_id_foreign` (`author_id`);
+  ADD KEY `news_user_id_foreign` (`user_id`);
 
 --
 -- Indeks untuk tabel `password_resets`
@@ -328,22 +290,16 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT untuk tabel `admins`
---
-ALTER TABLE `admins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT untuk tabel `authors`
+-- AUTO_INCREMENT untuk tabel `admin_news_approval`
 --
-ALTER TABLE `authors`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `admin_news_approval`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `failed_jobs`
@@ -361,7 +317,7 @@ ALTER TABLE `history`
 -- AUTO_INCREMENT untuk tabel `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT untuk tabel `news`
@@ -391,17 +347,11 @@ ALTER TABLE `topics`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
-
---
--- Ketidakleluasaan untuk tabel `admins`
---
-ALTER TABLE `admins`
-  ADD CONSTRAINT `admins_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `admin_approval`
@@ -410,10 +360,10 @@ ALTER TABLE `admin_approval`
   ADD CONSTRAINT `admin_approval_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Ketidakleluasaan untuk tabel `authors`
+-- Ketidakleluasaan untuk tabel `admin_news_approval`
 --
-ALTER TABLE `authors`
-  ADD CONSTRAINT `authors_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `admin_news_approval`
+  ADD CONSTRAINT `admin_news_approval_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Ketidakleluasaan untuk tabel `history`
@@ -425,8 +375,8 @@ ALTER TABLE `history`
 -- Ketidakleluasaan untuk tabel `news`
 --
 ALTER TABLE `news`
-  ADD CONSTRAINT `news_author_id_foreign` FOREIGN KEY (`author_id`) REFERENCES `authors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `news_sub_topic_id_foreign` FOREIGN KEY (`sub_topic_id`) REFERENCES `sub_topics` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `news_sub_topic_id_foreign` FOREIGN KEY (`sub_topic_id`) REFERENCES `sub_topics` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `news_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `sub_topics`
