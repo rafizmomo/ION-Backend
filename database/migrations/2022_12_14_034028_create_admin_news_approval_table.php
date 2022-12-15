@@ -15,13 +15,19 @@ return new class extends Migration
     {
         Schema::create('admin_news_approval', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("user_id", false);
             $table->string("news_title");
-            $table->string("news_content");
+            $table->string("news_content", 100)->unique();
+            $table->string("news_slug", 60);
             $table->string("news_picture_link", 150);
             $table->string("news_picture_name", 50);
-            $table->string("news_picture_path", 50)->nullable();
-            $table->foreign("user_id")->references("id")->on("users");
+            $table->string("news_picture_path")->nullable();
+            $table->bigInteger("added_at", false, true); //Unsigned big integer, not auto increment
+            $table->bigInteger("updated_at", false, true)->nullable(); //Unsigned big integer, not auto increment
+            $table->string("news_status", 20);
+            $table->unsignedBigInteger("sub_topic_id", false)->nullable(true);
+            $table->foreign("sub_topic_id")->references("id")->on("sub_topics")->onUpdate("cascade")->onDelete("set null");
+            $table->unsignedBigInteger("user_id", false)->nullable();
+            $table->foreign("user_id")->references("id")->on("users")->onUpdate("cascade")->onDelete("cascade");
         });
     }
 

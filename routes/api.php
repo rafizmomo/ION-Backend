@@ -7,7 +7,7 @@ use App\Http\Controllers\TopicController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubTopicController;
 use App\Http\Controllers\AdminApprovalController;
-// use App\Resources\NewsSubTopicsResource;
+use App\Http\Controllers\AdminNewsApprovalController;
 use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
@@ -38,7 +38,6 @@ Route::post("/news", [NewsController::class, "store"]);
 Route::get("/shownewsbytopic/{id}", [NewsController::class, "showNewsByTopic"]);
 Route::get("/news/{id}", [NewsController::class, "show"]);
 Route::get("/news/search", [NewsController::class, "index"]);
-
 Route::get("/sub_topics", [SubTopicController::class, "index"]);
 Route::get("/sub_topics{sub_topics}", [SubTopicController::class, "show"]);
 Route::post("/sub_topics", [SubTopicController::class, "store"]);
@@ -55,11 +54,18 @@ Route::get("/user", [UserController::class, "getAllUser"]);
 Route::post("/logout", [AuthController::class, "signout"]);
 
 // Admin Approval Route
-Route::get("/adminapproval", [AdminApprovalController::class, "listAdminApproval"]);
-Route::post("/adminapproval/{id}", [AdminApprovalController::class, "makeApproval"]);
-Route::prefix("adminapproval")->group(function () {
-    route::get("/approve/{id}", [AuthorController::class, "approve"]);
-    route::post("/reject", [AuthorController::class, "reject"]);
+Route::get("/adminapproval/author", [AdminApprovalController::class, "listAdminApproval"]);
+Route::post("/adminapproval/author/{id}", [AdminApprovalController::class, "makeApproval"]);
+Route::prefix("adminapproval/author")->group(function () {
+    route::get("approve/{id}", [AuthorController::class, "approve"]);
+    route::post("reject/{id}", [AuthorController::class, "reject"]);
+});
+
+Route::get("/adminapproval/news", [AdminNewsApprovalController::class, ""]);
+Route::post("/adminapproval/news", [AdminNewsApprovalController::class, "makeApproval"]);
+Route::prefix("adminapproval/news")->group(function () {
+    route::get("approve/{id}", [NewsController::class, "approve"]);
+    route::post("reject/{id}", [NewsController::class, "reject"]);
 });
 
 Route::get("/shownewsforadminreview", [NewsController::class, "showNewsForAdminReview"]);

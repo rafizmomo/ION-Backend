@@ -18,8 +18,8 @@ return new class extends Migration
             $table->id();
             $table->string("topic_title", 60)->unique();
             $table->string("topic_slug", 200);
-            $table->bigInteger("added_at", false, true);
-            $table->bigInteger("updated_at", false, true);
+            $table->bigInteger("added_at", false, true); //Unsigned big integer, not auto increment
+            $table->bigInteger("updated_at", false, true)->nullable(); //Unsigned big integer, not auto increment
         });
     }
 

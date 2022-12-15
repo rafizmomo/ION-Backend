@@ -21,6 +21,7 @@ class AdminApproval extends Model
         'author_description',
         'photo_profile_link',
         'photo_profile_name',
+        'photo_profile_path',
         'join_at',
         'user_id',
     ];

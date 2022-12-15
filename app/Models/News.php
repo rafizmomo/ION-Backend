@@ -22,10 +22,12 @@ class News extends Model
         'news_slug',
         'news_picture_link',
         'news_picture_name',
+        'news_picture_path',
         'added_at',
         'updated_at',
         'news_status',
         'sub_topic_id',
+        'user_id'
     ];
     public function sub_topics()
     {

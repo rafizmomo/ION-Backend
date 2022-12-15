@@ -3,15 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use App\Models\AdminApproval;
-use App\Models\User;
+use App\Models\AdminNewsApproval;
 
-class AdminApprovalController extends Controller
+class AdminNewsApprovalController extends Controller
 {
-    public function makeApproval(Request $request, $id)
+    public function makeApproval(Request $request)
     {
         $date_now = round(microtime(true) * 1000);
         $response = null;
@@ -22,22 +20,25 @@ class AdminApprovalController extends Controller
         $without_extension = $file_name[0];
         $directory = "storage";
         $author_description = $request->author_description;
+
         $url = config("app.url");
         $image_url_directory = stripslashes($url . "/" . $directory . "/photo_profile" . "/" . $file_name);
-        // $store_image_url_directory_ = str_replace("\\", "", $url . "/" . $directory . "/photo_profile" . "/");
 
         $validator = Validator::make($request->all(), [
+            "news_title" => "required",
+            "news_content" => "required",
             "image_file" => "required|image:jpeg,png,jpg|max:5500",
             "author_description" => "required",
+            "user_id" => "required|number"
         ]);
 
         $author_data = array(
-            "author_description" => $author_description,
-            "photo_profile_link" => $image_url_directory,
-            "photo_profile_name" => $file_name,
-            "photo_profile_path" => preg_replace("/\s+/", "", strtolower("storage/photo_profile")),
-            "join_at" => $date_now,
-            "user_id" => intval($id),
+            "news_title" => $author_description,
+            "photo_picture_link" => $image_url_directory,
+            "photo_picture_name" => $file_name,
+            "photo_picture_path" => preg_replace("/\s+/", "", strtolower("storage/photo_profile")),
+            "added_at" => $date_now,
+            "updated_at" => 0,
         );
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
@@ -50,14 +51,6 @@ class AdminApprovalController extends Controller
                 $response = response()->json(["authors" => $author_data, "status" => "Fail", "status_code" => 409, "message" => "Failed to create author account"], 409);
             }
         }
-
-        return $response;
-    }
-
-    public function listAdminApproval()
-    {
-        $listdmin = DB::table("admin_approval")->join("users", "users.id", "=", "admin_approval.user_id")
-            ->select("admin_approval.*", "users.name")->get();
-        return response()->json(["admin_approval" => $listdmin], 200);
+        // return $response;
     }
 }

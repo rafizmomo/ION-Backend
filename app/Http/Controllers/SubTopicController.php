@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Resources\NewsSubTopicsResource;
 use App\Models\SubTopics;
 use App\Models\Topics;
-use Illuminate\Auth\Events\Validated;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class SubTopicController extends Controller
 {
@@ -36,30 +36,38 @@ class SubTopicController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
         $lower_str = strtolower($request->input("sub_topic_title"));
         $no_whitespace = preg_replace("/\s+/", "-", $lower_str);
         $added_at = round(microtime(true) * 1000);
         $sub_topic_title = ucwords($request->input("sub_topic_title"));
-        $topic_id = intval($request->input("topic_id"));
         $data["sub_topic_title"] = $sub_topic_title;
         $data["sub_topic_slug"] = (string)$no_whitespace;
         $data["added_at"] = $added_at;
         $data["updated_at"] = 0;
-        $data["topic_id"] = $topic_id;
-        $get_topic_id = Topics::where("id", $topic_id)->first();
+        $data["topic_id"] = intval($request->input("topic_id"));
         $response = null;
+        $validator = Validator::make($request->all(), [
+            "sub_topic_title" => "required",
+            "topic_id" => "required",
+        ]);
 
-        try {
+        if ($validator->fails()) {
+            $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
+        } else {
+            try {
 
-            if (SubTopics::where("sub_topic_title", $sub_topic_title)->first() != null) {
-                $response = response()->json(["data" => $data, "status" => "Failed", "message" => "Sub topic: " . $sub_topic_title . " is exist"], 409);
-            } else {
-                SubTopics::create($data);
-                $response = response()->json(["data" => $data, "status" => "Succcess", "message" => "Succedd to create a sub topic"], 200);
+                if (SubTopics::where("sub_topic_title", $sub_topic_title)->first() != null) {
+                    $response = response()->json(["data" => $data, "status" => "Failed", "status_code" => 409, "message" => "Sub topic can not be created"], 409);
+                } else {
+                    SubTopics::create($data);
+                    $response = response()->json(["data" => $data, "status" => "Succcess", "status_code" => 200, "message" => "Succedd to create a sub topic"], 200);
+                }
+            } catch (\Illuminate\Database\QueryException $th) {
+                $response = response()->json(["message", "status_code" => 404, "message" => "Topic id is not found"], 404);
             }
-        } catch (\Illuminate\Database\QueryException $th) {
-            $response = response()->json(["message" => $th->getMessage()], 404);
         }
+
         return $response;
     }
 
@@ -82,31 +90,38 @@ class SubTopicController extends Controller
             "topic_id" => $topic_id
         );
         $response = null;
-        if ($this->SubTopicWithCondition("sub_topic_title", $sub_topic_title_capitalize) != null) {
-            $json_encode = json_encode(SubTopics::where("sub_topic_title", $sub_topic_title_capitalize)->select("id", "sub_topic_title")->get());
-            $json_decode_id =  json_decode($json_encode)[0]->id;
-            $json_decode_sub_topic_title =  json_decode($json_encode)[0]->sub_topic_title;
-            $json_encode_sub_topic_byid = json_encode(SubTopics::where("id", $id)->select("id", "sub_topic_title")->get());
-            $json_decode_sub_topic_byid =  json_decode($json_encode_sub_topic_byid)[0]->id;
-            if ($id == $json_decode_id && $sub_topic_title_capitalize == $json_decode_sub_topic_title) {
-                $sub_topic_update->update($array_update);
-                $response = response()->json(["sub_topics" => $array_update, "status" => "Success", "message" => "Successfully update sub topic"], 200);
-            } else if ($id == $json_decode_sub_topic_byid && $this->SubTopicWithCondition("sub_topic_title", $sub_topic_title_capitalize)->get() != null) {
-                $response =  response()->json(["sub_topics" => $array_update, "status" => "Failed", "message" => "Failed update sub topic"], 409);
-            }
+        $validator = Validator::make($request->all(), [
+            "sub_topic_title" => "request",
+            "topic_id" => "require|number"
+        ]);
+        if ($validator->fails()) {
+            $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
         } else {
-            $sub_topic_update->update($array_update);
-            $response = response()->json(["sub_topics" => $sub_topic_update, "status" => "Success", "message" => "Successfully update sub topic"], 200);
+            if ($this->SubTopicWithCondition("id", $id) != null) {
+                $json_encode = json_encode(SubTopics::where("id", $id)->select("id", "sub_topic_title")->get());
+                $json_decode_id =  json_decode($json_encode)[0]->id;
+                $json_decode_sub_topic_title =  json_decode($json_encode)[0]->sub_topic_title;
+                if ($id == $json_decode_id && $sub_topic_title_capitalize == $json_decode_sub_topic_title) {
+                    $sub_topic_update->update($array_update);
+                    $response = response()->json(["sub_topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Successfully update sub topic"], 200);
+                } else if ($id == $json_decode_sub_topic_title && $this->SubTopicWithCondition("sub_topic_title", $sub_topic_title_capitalize)->get() != null) {
+                    $response =  response()->json(["sub_topics" => $array_update, "status" => "Failed", "status_code" => 409, "message" => "Sub topic can not be updated"], 409);
+                }
+            } else {
+                $sub_topic_update->update($array_update);
+                $response = response()->json(["sub_topics" => $sub_topic_update, "status" => "Success", "status_code" => 200, "message" => "Successfully update sub topic"], 200);
+            }
         }
+
         return $response;
     }
 
     public function delete($id)
     {
-        $subtopics = SubTopics::findOrFail($id);
+        $subtopics = SubTopics::findOrFail(intval($id));
         if ($subtopics) {
             $subtopics->delete();
-            return response(["sub_topics" => $subtopics, "status" => "Successfully", "message" => "Successfully update sub topic"], 202);
+            return response(["sub_topics" => $subtopics, "status" => "Successfully", "status_code" => 200, "message" => "Successfully update sub topic"], 200);
         }
     }
 }

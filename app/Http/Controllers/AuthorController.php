@@ -8,25 +8,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\URL;
 use App\Models\AdminApproval;
 use App\Models\User;
-use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class AuthorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-        $users = DB::table('users')
-            ->leftJoin('authors', 'users.id', '=', 'authors.user_id')->select(["users.name", "users.created_at", "authors.join_at"])
-            ->get();
-
-        return $this->sendRespond($users, "Succcess", 200);
-    }
     /**
      * First, get admin approval id by user id in admin approval table
      * Second, delete a record by admin approval id in admin approval table
@@ -34,89 +20,54 @@ class AuthorController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function approve(Request $request, $id)
+    public function approve($id)
     {
         $date_now = round(microtime(true) * 1000);
-        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id", "photo_profile_link")->get();
-        $json_decode_approval = json_decode($admin_approval_user_id);
+        $admin_approval_user = AdminApproval::where("user_id", $id)
+            ->select("id", "author_description", "photo_profile_path", "photo_profile_name", "photo_profile_path")->get();
+        $json_decode_approval = json_decode($admin_approval_user);
         $user_id_from_admin_approval = $json_decode_approval[0]->id;
-        $user_photo_profile_link_from_admin_approval = $json_decode_approval[0]->photo_profile_link;
-        // $image_file = $request->file("image_file");
-        // $extension = $image_file->getExtension();
-        // $file_name = $image_file->getClientOriginalName();
-        // $file_name_ = explode(".", $file_name);
-        // $without_extension = $file_name[0];
+        $user_photo_profile_path_from_admin_approval = $json_decode_approval[0]->photo_profile_path;
+        $user_photo_profile_name_from_admin_approval = $json_decode_approval[0]->photo_profile_name;
+        $user_author_description_from_admin_approval = $json_decode_approval[0]->author_description;
         $directory = "storage/photo_profile";
-        $url = URL::to('');
-        // $image_url_directory = stripslashes($url . "/" . $directory . "/" . $file_name);
+        $url = config("app.url");
+        $image_url_directory = stripslashes($url . "/" . $directory . "/" . $user_photo_profile_name_from_admin_approval);
 
         $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
-        $create_author_role = User::findOrFail($id);
-        // $data_author = array(
-        //     "author_description" => $request->author_description,
-        //     "role" => "Author",
-        //     "photo_profile_link" => $image_url_directory,
-        //     "photo_proile_name" => $file_name,
-        // );
-        // $delete_admin_approval->delete();
-        // $create_author_role->update();
-        $test = parse_url($user_photo_profile_link_from_admin_approval, PHP_URL_HOST);
-        echo $test;
-        // echo $user_photo_profile_link_from_admin_approval;
-        // return response()->json(stripslashes($user_photo_profile_link_from_admin_approval), 201);
-
-        // return response()->json(["authors" => stripslashes($user_photo_profile_link_from_admin_approval), "status" => "Success", "message" => "Author has created"], 201);
+        $create_author_role = User::findOrFail(intval($user_id_from_admin_approval));
+        $data_author = array(
+            "author_description" => $user_author_description_from_admin_approval,
+            "role" => "Author Test",
+            "photo_profile_link" => $image_url_directory,
+            "photo_profile_name" => $user_photo_profile_name_from_admin_approval,
+            "photo_profile_path" => $user_photo_profile_path_from_admin_approval
+        );
+        $delete_admin_approval->delete();
+        $create_author_role->update($data_author);
+        return response()->json(["authors" => $data_author, "status" => "Success", "succes_code" => 200, "message" => "Author has created"], 200);
     }
 
-    public function reject(Request $request)
+    /**
+     * First, get admin approval id by user id in admin approval table
+     * Second, delete a record by admin approval id in admin approval table
+     * Last, cancel to create a new athor account 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function reject($id)
     {
-        $admin_approval_user_id = AdminApproval::where("user_id", intval($request->user_id))
-            ->select("id")->get();
+        $admin_approval_user_id = AdminApproval::where("user_id", intval($id))
+            ->select("id", "photo_profile_name", "photo_profile_path")->get();
         $json_decode_approval = json_decode($admin_approval_user_id);
         $user_id_json_decode_approval = $json_decode_approval[0]->id;
+        $user_file_path_json_decode_approval = $json_decode_approval[0]->photo_profile_path;
+        $user_file_name_json_decode_approval = $json_decode_approval[0]->photo_profile_name;
         $delete_admin_approval = AdminApproval::findOrFail($user_id_json_decode_approval);
         $delete_admin_approval->delete();
-        return response()->json(["admin_approval" => $delete_admin_approval, "status" => "Success", "You have rejected to create an author account"], 202);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-    }
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        if (File::exists($user_file_path_json_decode_approval . "/" . $user_file_name_json_decode_approval)) {
+            File::delete($user_file_path_json_decode_approval . "/" . $user_file_name_json_decode_approval);
+        }
+        return response()->json(["admin_approval" => $delete_admin_approval, "status" => "Success", "status_code" => 200, "You have rejected to create an author account"], 200);
     }
 }

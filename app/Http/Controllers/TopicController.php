@@ -58,10 +58,10 @@ class TopicController extends Controller
         $topic["updated_at"] = 0;
         $response = null;
         if ($topic_exist != null) {
-            $response = response()->json(["topics" => $topic, "status" => "Fail", "message" => "Failed to create a topic"], 409);
+            $response = response()->json(["topics" => $topic, "status" => "Fail", "status_code" => 409, "message" => "Failed to create a topic"], 409);
         } else {
             $poststopic = Topics::create($topic);
-            $response = response()->json(["topics" => $topic, "status" => "Success", "message" => "Succeed to add topic"], 201);
+            $response = response()->json(["topics" => $topic, "status" => "Success", "status_code" => 201, "message" => "Succeed to add topic"], 201);
         }
         return $response;
     }
@@ -90,13 +90,13 @@ class TopicController extends Controller
             $json_decode_topic_byid =  json_decode($json_encode_topic_byid)[0]->id;
             if ($id == $json_decode_id && $topic_title_capitalize == $json_decode_sub_topic_title) {
                 $topic_update->update($array_update);
-                $response = response()->json(["topics" => $array_update, "status" => "Success", "message" => "Succedd to update"], 202);
+                $response = response()->json(["topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Succedd to update"], 200);
             } else if ($id == $json_decode_topic_byid && $this->TopicWithCondition("topic_title", $topic_title_capitalize)->get() != null) {
-                $response =  response()->json(["topics" => $array_update, "status" => "Fail", "message" => "Failed to update"], 409);
+                $response =  response()->json(["topics" => $array_update, "status" => "Fail", "status_code" => 409, "message" => "Failed to update"], 409);
             }
         } else {
             $topic_update->update($array_update);
-            $response = response()->json(["topics" => $array_update, "status" => "Success", "message" => "Succeed to update"], 202);
+            $response = response()->json(["topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Succeed to update"], 200);
         }
         return $response;
     }
@@ -107,7 +107,7 @@ class TopicController extends Controller
         $response = null;
         if ($topics != null) {
             $topics->delete();
-            $response = response()->json(["topics" => $topics, "message" => "Data deleted successfully"], 200);
+            $response = response()->json(["topics" => $topics, "status" => "Success", "status_code" => 200, "message" => "Data deleted successfully"], 200);
         }
         return $response;
     }

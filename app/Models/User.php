@@ -29,6 +29,7 @@ class User extends Authenticatable
         'balance',
         'photo_profile_link',
         'photo_profile_name',
+        'photo_profile_path',
     ];
 
     /**

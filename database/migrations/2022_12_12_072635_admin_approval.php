@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string("author_description");
             $table->string("photo_profile_link", 150)->nullable();
             $table->string("photo_profile_name", 150)->nullable();
-            $table->string("photo_profile_path", 20)->nullable();
+            $table->string("photo_profile_path")->nullable();
             $table->unsignedBigInteger("join_at", false);
             $table->unsignedBigInteger("user_id", false)->nullable();
             $table->foreign("user_id")->references("id")->on("users")->cascadeOnDelete()->cascadeOnUpdate();
