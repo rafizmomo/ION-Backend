@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedDouble("balance")->nullable();
             $table->string("photo_profile_link", 150)->nullable();
             $table->string("photo_profile_name", 150)->nullable();
+            $table->string("photo_profile_path", 50)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

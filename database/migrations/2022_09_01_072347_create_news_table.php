@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string("news_slug", 20);
             $table->string("news_picture_link", 150);
             $table->string("news_picture_name", 50);
+            $table->string("news_picture_path", 50)->nullable();
             $table->bigInteger("added_at", false, true);
             $table->bigInteger("updated_at", false, true);
             $table->string("news_status");

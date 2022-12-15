@@ -18,6 +18,9 @@ return new class extends Migration
             $table->unsignedBigInteger("user_id", false);
             $table->string("news_title");
             $table->string("news_content");
+            $table->string("news_picture_link", 150);
+            $table->string("news_picture_name", 50);
+            $table->string("news_picture_path", 50)->nullable();
             $table->foreign("user_id")->references("id")->on("users");
         });
     }

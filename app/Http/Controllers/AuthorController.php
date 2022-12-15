@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\URL;
 use App\Models\AdminApproval;
 use App\Models\User;
-
+use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Support\Facades\Storage;
 
 class AuthorController extends Controller
 {
@@ -36,28 +37,35 @@ class AuthorController extends Controller
     public function approve(Request $request, $id)
     {
         $date_now = round(microtime(true) * 1000);
-        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id")->get();
+        $admin_approval_user_id = AdminApproval::where("user_id", $id)->select("id", "photo_profile_link")->get();
         $json_decode_approval = json_decode($admin_approval_user_id);
         $user_id_from_admin_approval = $json_decode_approval[0]->id;
-        $image_file = $request->file("image_file");
-        $extension = $image_file->getExtension();
-        $file_name = $image_file->getClientOriginalName();
-        $file_name_ = explode(".", $file_name);
-        $without_extension = $file_name[0];
+        $user_photo_profile_link_from_admin_approval = $json_decode_approval[0]->photo_profile_link;
+        // $image_file = $request->file("image_file");
+        // $extension = $image_file->getExtension();
+        // $file_name = $image_file->getClientOriginalName();
+        // $file_name_ = explode(".", $file_name);
+        // $without_extension = $file_name[0];
         $directory = "storage/photo_profile";
         $url = URL::to('');
-        $image_url_directory = stripslashes($url . "/" . $directory . "/" . $file_name);
-        $data_author = array(
-            "author_description" => $request->author_description,
-            "role" => "Author",
-            "photo_profile_link" => $image_url_directory,
-            "photo_proile_name" => $file_name,
-        );
+        // $image_url_directory = stripslashes($url . "/" . $directory . "/" . $file_name);
+
         $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
-        $delete_admin_approval->dlete();
         $create_author_role = User::findOrFail($id);
-        $create_author_role->update();
-        return response()->json(["authors", "status" => "Success", "message" => "Author has created"], 201);
+        // $data_author = array(
+        //     "author_description" => $request->author_description,
+        //     "role" => "Author",
+        //     "photo_profile_link" => $image_url_directory,
+        //     "photo_proile_name" => $file_name,
+        // );
+        // $delete_admin_approval->delete();
+        // $create_author_role->update();
+        $test = parse_url($user_photo_profile_link_from_admin_approval, PHP_URL_HOST);
+        echo $test;
+        // echo $user_photo_profile_link_from_admin_approval;
+        // return response()->json(stripslashes($user_photo_profile_link_from_admin_approval), 201);
+
+        // return response()->json(["authors" => stripslashes($user_photo_profile_link_from_admin_approval), "status" => "Success", "message" => "Author has created"], 201);
     }
 
     public function reject(Request $request)

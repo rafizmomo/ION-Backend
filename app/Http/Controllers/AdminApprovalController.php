@@ -24,7 +24,7 @@ class AdminApprovalController extends Controller
         $author_description = $request->author_description;
         $url = URL::to('');
         $image_url_directory = stripslashes($url . "/" . $directory . "/photo_profile" . "/" . $file_name);
-        $store_image_url_directory_ = stripslashes($url . "/" . $directory . "/photo_profile" . "/");
+        $store_image_url_directory_ = str_replace("\\", "", $url . "/" . $directory . "/photo_profile" . "/");
         $author_data = array(
             "author_description" => $author_description,
             "photo_profile_link" => $image_url_directory,

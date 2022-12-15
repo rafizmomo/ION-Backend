@@ -58,7 +58,7 @@ Route::post("/logout", [AuthController::class, "signout"]);
 Route::get("/adminapproval", [AdminApprovalController::class, "listAdminApproval"]);
 Route::post("/adminapproval/{id}", [AdminApprovalController::class, "makeApproval"]);
 Route::prefix("adminapproval")->group(function () {
-    route::post("/approve/{id}", [AuthorController::class, "approve"]);
+    route::get("/approve/{id}", [AuthorController::class, "approve"]);
     route::post("/reject", [AuthorController::class, "reject"]);
 });
 
