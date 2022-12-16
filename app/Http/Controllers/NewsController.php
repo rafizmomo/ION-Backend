@@ -47,12 +47,14 @@ class NewsController extends Controller
     //     dd(\DB::getQueryLog());
     // }
 
+    public function show($id)
+    {
+    }
     function index()
     {
         $news = SubTopics::with("news")->join("news", "news.id", "=", "news_sub_topics.news_sub_topic_id")->select("news.*", "news_sub_topics.*")->get();
-        return response()->join($news);
+        return response()->join($news, 200);
     }
-
     public function showNewsForAdminReview()
     {
         $news = DB::table("news")->join("authors", "authors.id", "=", "news.author_id")
@@ -60,7 +62,6 @@ class NewsController extends Controller
             ->select("news.*", "authors.*")->get();
         return response()->json($news, 200);
     }
-
     /**
      * @param \Illuminate\Http\Request $request
      */
@@ -125,17 +126,27 @@ class NewsController extends Controller
         }
         return response()->json(["admin_approval" => $delete_admin_approval, "status" => "Success", "status_code" => 200, "You have rejected to create an author account"], 200);
     }
+    public function getTopicIdByTopicSlug(string $topic_slug)
+    {
+        $string_topic_slug = strval($topic_slug);
+        $id = Topics::where("topic_slug", $string_topic_slug)->select("id")->get();
+        $json_encode = json_decode($id);
+        return $json_encode[0]->id;
+    }
+    public function getSubTopicIdBySubTopicSlug(string $sub_topic_slug)
+    {
+        $string_sub_topic_slug = strval($sub_topic_slug);
+        $id = SubTopics::where("sub_topic_slug", $string_sub_topic_slug)->select("id")->get();
+        $json_encode = json_decode($id);
+        return $json_encode[0]->id;
+    }
     public function showNewsByTopics()
     {
-        DB::enableQueryLog();
         $topics = Topics::with("news")->get();
-        DB::getQueryLog();
-        return response()->json([$topics], 200);
+        return response()->json($topics, 200);
     }
-
     // For home page in topic_home, visitor
-    public function
-    showNewsByTopic($id)
+    public function showNewsByTopic($topic_id)
     {
         DB::enableQueryLog();
         $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
@@ -145,13 +156,11 @@ class NewsController extends Controller
                 "sub_topics.added_at as sub_topic_added_at",
                 "sub_topics.updated_at as sub_topic_updated_at"
             )
-            ->where("sub_topics.topic_id", $id)
+            ->where("sub_topics.topic_id", intval($topic_id))
             ->get();
-        var_dump(DB::getQueryLog());
         return response()->json($join_news, 200);
     }
-
-    public function showNewsBySubTopicsAndTopics(int $topic_id)
+    public function showNewsBySubTopicsAndTopics(int $topic_id, int $sub_topic_id)
     {
         DB::enableQueryLog();
         $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
@@ -161,21 +170,27 @@ class NewsController extends Controller
                 "sub_topics.added_at as sub_topic_added_at",
                 "sub_topics.updated_at as sub_topic_updated_at"
             )
-            ->where([["sub_topics.topic_id", $topic_id], []])
+            ->where([["sub_topics.topic_id", intval($topic_id)], ["news.sub_topic_id", intval($sub_topic_id)]])
             ->get();
-        var_dump(DB::getQueryLog());
         return response()->json($join_news, 200);
     }
-
-    public function showNewsBySubTopics()
+    public function readingNews(int $topic_id, int $sub_topic_id, string $news_title)
     {
-        $news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")->select("news.id", "news.news_title", "news.news_content", "news.news_slug", "news.news_picture_link", "news.news_picture_name", "news.added_at", "news.updated_at", "sub_topics.sub_topic_title")->get();
-        return response()->json(["news" => $news], 200);
-    }
-
-    public function showNewsBySubTopic($id)
-    {
-        $news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")->where("news.sub_topic_id", $id)->select("news.*", "sub_topics.sub_topic_title")->get();
-        return response()->json(["news" => $news], 200);
+        DB::enableQueryLog();
+        $join_news = DB::table("news")
+            ->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
+            ->join("users", "users.id", "=", "news.user_id")
+            ->select(
+                "news.*",
+                "sub_topics.sub_topic_title",
+                "users.name",
+                "users.photo_profile_link",
+                "users.photo_profile_name",
+                "sub_topics.added_at as sub_topic_added_at",
+                "sub_topics.updated_at as sub_topic_updated_at"
+            )
+            ->where([["sub_topics.topic_id", intval($topic_id)], ["news.sub_topic_id", intval($sub_topic_id)], ["news.news_title", strval($news_title)]])
+            ->get();
+        return response()->json($join_news, 200);
     }
 }

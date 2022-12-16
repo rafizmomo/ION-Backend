@@ -19,28 +19,33 @@ class AuthorController extends Controller
      */
     public function approve($id)
     {
-        $admin_approval_user = AdminApproval::where("user_id", $id)
-            ->select("id", "author_description", "photo_profile_path", "photo_profile_name", "photo_profile_path")->get();
+        $admin_approval_user = AdminApproval::where("user_id", intval($id))
+            ->select("id", "user_id", "author_description", "photo_profile_link", "photo_profile_name", "photo_profile_path")->get();
         $json_decode_approval = json_decode($admin_approval_user);
-        $user_id_from_admin_approval = $json_decode_approval[0]->id;
+        $id = $json_decode_approval[0]->id;
+        $user_id_from_admin_approval = $json_decode_approval[0]->user_id;
         $user_photo_profile_path_from_admin_approval = $json_decode_approval[0]->photo_profile_path;
         $user_photo_profile_name_from_admin_approval = $json_decode_approval[0]->photo_profile_name;
         $user_author_description_from_admin_approval = $json_decode_approval[0]->author_description;
         $directory = "storage/photo_profile";
         $url = config("app.url");
         $image_url_directory = stripslashes($url . "/" . $directory . "/" . $user_photo_profile_name_from_admin_approval);
-        $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
-        $create_author_role = User::findOrFail(intval($user_id_from_admin_approval));
+        $delete_admin_approval = AdminApproval::findOrFail($id);
+        $create_author_role = User::find(intval($user_id_from_admin_approval));
         $data_author = array(
             "author_description" => $user_author_description_from_admin_approval,
-            "role" => "Author Test",
+            "role" => "Author",
             "photo_profile_link" => $image_url_directory,
             "photo_profile_name" => $user_photo_profile_name_from_admin_approval,
             "photo_profile_path" => $user_photo_profile_path_from_admin_approval
         );
-        $delete_admin_approval->delete();
-        $create_author_role->update($data_author);
-        return response()->json(["authors" => $data_author, "status" => "Success", "succes_code" => 200, "message" => "Author has created"], 200);
+        try {
+            $delete_admin_approval->delete();
+            $create_author_role->update($data_author);
+        } catch (\Illuminate\Database\QueryException $th) {
+            return response()->json($th->getMessage(), 400);
+        }
+        return response()->json(["authors" => $json_decode_approval, "status" => "Success", "succes_code" => 200, "message" => "Author has created"], 200);
     }
 
     /**
