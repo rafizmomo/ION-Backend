@@ -46,10 +46,6 @@ class NewsController extends Controller
     //     return $test;
     //     dd(\DB::getQueryLog());
     // }
-
-    public function show($id)
-    {
-    }
     function index()
     {
         $news = SubTopics::with("news")->join("news", "news.id", "=", "news_sub_topics.news_sub_topic_id")->select("news.*", "news_sub_topics.*")->get();
