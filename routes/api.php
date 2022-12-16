@@ -57,15 +57,15 @@ Route::post("/logout", [AuthController::class, "signout"]);
 Route::get("/adminapproval/author", [AdminApprovalController::class, "listAdminApproval"]);
 Route::post("/adminapproval/author/{id}", [AdminApprovalController::class, "makeApproval"]);
 Route::prefix("adminapproval/author")->group(function () {
-    route::get("approve/{id}", [AuthorController::class, "approve"]);
+    route::post("approve/{id}", [AuthorController::class, "approve"]);
     route::post("reject/{id}", [AuthorController::class, "reject"]);
 });
 
-Route::get("/adminapproval/news", [AdminNewsApprovalController::class, ""]);
-Route::post("/adminapproval/news", [AdminNewsApprovalController::class, "makeApproval"]);
+Route::get("/adminapproval/news", [AdminNewsApprovalController::class, "showAdminNewsApproval"]);
+Route::post("/adminapproval/news/{user_id}", [AdminNewsApprovalController::class, "makeApproval"]);
 Route::prefix("adminapproval/news")->group(function () {
-    route::get("approve/{id}", [NewsController::class, "approve"]);
-    route::post("reject/{id}", [NewsController::class, "reject"]);
+    route::post("approve/{news_title}", [NewsController::class, "approve"]);
+    route::post("reject/{news_title}", [NewsController::class, "reject"]);
 });
 
 Route::get("/shownewsforadminreview", [NewsController::class, "showNewsForAdminReview"]);

@@ -18,7 +18,7 @@ return new class extends Migration
 
         Schema::create("news", function (Blueprint $table) {
             $table->id();
-            $table->string("news_title", 100)->unique();
+            $table->string("news_title", 100);
             $table->longText("news_content");
             $table->string("news_slug", 20);
             $table->string("news_picture_link", 150);

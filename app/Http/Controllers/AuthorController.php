@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\URL;
 use App\Models\AdminApproval;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
+
 
 class AuthorController extends Controller
 {
@@ -22,7 +19,6 @@ class AuthorController extends Controller
      */
     public function approve($id)
     {
-        $date_now = round(microtime(true) * 1000);
         $admin_approval_user = AdminApproval::where("user_id", $id)
             ->select("id", "author_description", "photo_profile_path", "photo_profile_name", "photo_profile_path")->get();
         $json_decode_approval = json_decode($admin_approval_user);
@@ -33,7 +29,6 @@ class AuthorController extends Controller
         $directory = "storage/photo_profile";
         $url = config("app.url");
         $image_url_directory = stripslashes($url . "/" . $directory . "/" . $user_photo_profile_name_from_admin_approval);
-
         $delete_admin_approval = AdminApproval::findOrFail($user_id_from_admin_approval);
         $create_author_role = User::findOrFail(intval($user_id_from_admin_approval));
         $data_author = array(

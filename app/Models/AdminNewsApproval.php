@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AdminNewsApproval extends Model
 {
     use HasFactory;
+    protected $table = "admin_news_approval";
     public $timestamps = false;
     protected $fillable = [
         'news_title',
@@ -16,9 +17,6 @@ class AdminNewsApproval extends Model
         'news_picture_link',
         'news_picture_name',
         'news_picture_path',
-        'added_at',
-        'updated_at',
-        'news_status',
         'sub_topic_id',
         "user_id",
     ];

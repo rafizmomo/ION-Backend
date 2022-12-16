@@ -4,53 +4,80 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 use App\Models\AdminNewsApproval;
+use App\Models\SubTopics;
+use App\Models\News;
 
 class AdminNewsApprovalController extends Controller
 {
-    public function makeApproval(Request $request)
+    public function makeApproval(Request $request, $user_id)
     {
         $date_now = round(microtime(true) * 1000);
         $response = null;
         $image_file = $request->file("image_file");
-        $extension = $image_file->getExtension();
         $file_name = $image_file->getClientOriginalName();
-        $file_name_ = explode(".", $file_name);
-        $without_extension = $file_name[0];
+        $direct_file = $image_file->getClientOriginalName();
         $directory = "storage";
-        $author_description = $request->author_description;
-
-        $url = config("app.url");
-        $image_url_directory = stripslashes($url . "/" . $directory . "/photo_profile" . "/" . $file_name);
-
+        $news_title = ucwords($request->news_title);
+        $news_content = $request->news_content;
+        $file_path_info = pathinfo($file_name);
+        $base_name = $file_path_info["filename"];
         $validator = Validator::make($request->all(), [
-            "news_title" => "required",
+            "news_title" => "required|unique:admin_news_approval",
             "news_content" => "required",
             "image_file" => "required|image:jpeg,png,jpg|max:5500",
-            "author_description" => "required",
-            "user_id" => "required|number"
+            "sub_topic_id" => "required|numeric"
         ]);
-
-        $author_data = array(
-            "news_title" => $author_description,
-            "photo_picture_link" => $image_url_directory,
-            "photo_picture_name" => $file_name,
-            "photo_picture_path" => preg_replace("/\s+/", "", strtolower("storage/photo_profile")),
-            "added_at" => $date_now,
-            "updated_at" => 0,
-        );
+        $news_data["news_title"] = $news_title;
+        $news_data["news_content"] = $news_content;
+        $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title));
+        $news_data["sub_topic_id"] = $request->sub_topic_id;
+        $news_data["user_id"] = intval($user_id);
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
         } else {
-            if (AdminApproval::where("user_id", $id)->first() == null) {
-                $image_file->move($directory . "/" . "photo_profile", $file_name);
-                AdminApproval::create($author_data);
-                $response = response()->json(["authors" => $author_data, "status" => "Success", "message" => "You have signigned to join as author. Please wait until approved"], 201);
+            $counter = 1;
+            if (AdminNewsApproval::where("user_id", intval($user_id))->count() >= 2) {
+                $response = response()->json(["authors" => $news_data, "status" => "Fail", "status_code" => 409, "message" => "You have created news more than two times"], 409);
             } else {
-                $response = response()->json(["authors" => $author_data, "status" => "Fail", "status_code" => 409, "message" => "Failed to create author account"], 409);
+                $extension_test = File::extension($directory . "/" . "news_image/" . $file_name);
+                $current_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
+                if (File::exists($directory . "/" . "news_image/" . $file_name)) {
+                    if (File::exists($directory . "/" . "news_image/" . $current_counter_file)) {
+                        do {
+                            $next_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
+                            $current_counter_file = $next_counter_file;
+                            $counter++;
+                        } while (File::exists($directory . "/" . "news_image/" . $current_counter_file));
+                        $file_name =  $current_counter_file;
+                    } else {
+                        $file_name = $current_counter_file;
+                    }
+                } else {
+                    $file_name = $direct_file;
+                }
+                $url = config("app.url");
+                $image_url_directory = stripslashes($url . "/" . $directory . "/news_image" . "/" . $file_name);
+                $news_data["news_picture_link"] = $image_url_directory;
+                $news_data["news_picture_name"] = $file_name;
+                $news_data["news_picture_path"] = preg_replace("/\s+/", "", strtolower("storage/news_image"));
+                File::copy($image_file, $directory . "/" . "news_image/" . $file_name);
+                AdminNewsApproval::create($news_data);
+                $response = response()->json(["authors" => $news_data, "status" => "Success", "status_code" => 200, "message" => "You create a news. Please wait until approved"], 200);
             }
         }
-        // return $response;
+        return $response;
+    }
+    public function showAdminNewsApproval()
+    {
+        $approval_list = DB::table("admin_news_approval")->join("users", "users.id", "=", "admin_news_approval.user_id")
+            ->join("sub_topics", "sub_topics.id", "=", "admin_news_approval.sub_topic_id")
+            ->select("admin_news_approval.id", "admin_news_approval.news_title", "admin_news_approval.news_content", "admin_news_approval.news_picture_link", "admin_news_approval.news_picture_name", "sub_topics.sub_topic_title", "users.name", "users.id as user_id")
+            ->get();
+        return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);
     }
 }

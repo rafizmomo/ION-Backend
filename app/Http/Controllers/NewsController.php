@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\Controller as Controller;
+use Illuminate\Support\Facades\File;
 use App\Models\News;
 use App\Models\Topics;
 use App\Models\SubTopics;
+use App\Models\AdminNewsApproval;
+use App\Http\Controllers\Controller as Controller;
+use App\Models\AdminApproval;
 use Exception;
 
 // Eager: Join
@@ -62,55 +64,67 @@ class NewsController extends Controller
     /**
      * @param \Illuminate\Http\Request $request
      */
-    public function store(Request $request)
+    public function approve($news_title)
     {
         $date_now = round(microtime(true) * 1000);
-        $news_title = ucwords($request->news_title);
-        $lower_case = strtolower($news_title);
-        $slug_no_whitespaces = preg_replace("/\s+/", "-", $lower_case);
-        $image_file = $request->file("image_file");
-        $extension = $image_file->getExtension();
-        $file_name = $image_file->getClientOriginalName();
-        $file_name_ = explode(".", $file_name);
-        $without_extension = $file_name[0];
-        $directory = "storage";
-        $url = URL::to('');
-        $image_url_directory = stripslashes($url . "/" . $directory . "/" . $file_name);
-        $validator = Validator::make($request->all(), [
-            "news_title" => "required",
-            "news_content" => "required",
-            "image_file" => "required|image:jpeg,png,jpg|max:5500",
-            "sub_topic_id" => "required|numeric",
-            "author_id" => "required|numeric"
-        ]);
-
-        $data["news_title"] = $news_title;
-        $data["news_content"] = $request->news_content;
-        $data["news_slug"] = $slug_no_whitespaces;
-        $data["news_picture_link"] = $image_url_directory;
-        $data["news_picture_name"] = $file_name;
-        $data["added_at"] = $date_now;
-        $data["updated_at"] = 0;
-        $data["sub_topic_id"] = $request->sub_topic_id;
-        $data["author_id"] = $request->author_id;
+        $admin_approval = AdminNewsApproval::where("news_title", $news_title)->get();
+        $json_decode = json_decode($admin_approval);
+        $news_new = null;
+        $news_content = null;
+        $news_slug = null;
+        $news_picture_link = null;
+        $news_picture_name = null;
+        $news_picture_path = null;
+        $news_sub_topic_id = null;
+        $user_id = null;
+        if (AdminNewsApproval::where("news_title", $news_title)->first() != null) {
+            $news_new = $json_decode[0]->news_title;
+            $news_content = $json_decode[0]->news_content;
+            $news_slug = $json_decode[0]->news_slug;
+            $news_picture_link = $json_decode[0]->news_picture_link;
+            $news_picture_name = $json_decode[0]->news_picture_name;
+            $news_picture_path = $json_decode[0]->news_picture_path;
+            $news_sub_topic_id = $json_decode[0]->sub_topic_id;
+            $user_id = $json_decode[0]->user_id;
+        }
         $response = null;
-        if ($validator->fails()) {
-            $response = response()->json(["status" => "Failed", $validator->errors()], 422);
-        } else {
-            if (News::where("news_title", $news_title)->first() != null) {
-                $response = response()->json(["status" => "Failed", "message" => "The news title has existed"], 409);
-            } else {
-                try {
-                    $image_file->move($directory, $image_file->getClientOriginalName());
-                    News::create($data);
-                } catch (Exception $excption) {
-                    $response = response()->json(["status" => "Failed", $excption->getMessage()]);
-                }
+        if ($news_new != null) {
+            try {
+                $data["news_title"] = $news_new;
+                $data["news_content"] = $news_content;
+                $data["news_slug"] = $news_slug;
+                $data["news_picture_link"] = $news_picture_link;
+                $data["news_picture_name"] = $news_picture_name;
+                $data["news_picture_path"] = $news_picture_path;
+                $data["added_at"] = $date_now;
+                $data["news_status"] = "Paid";
+                $data["sub_topic_id"] = $news_sub_topic_id;
+                $data["user_id"] = $user_id;
+                $delete_news_approval = AdminNewsApproval::where("news_title", $news_new);
+                $delete_news_approval->delete();
+                News::create($data);
+                $response = response()->json(["approve_news" => $data, "status" => "Succes", "status_code" => 200], 200);
+            } catch (Exception $excption) {
+                $response = response()->json(["status" => "Failed", $excption->getMessage()]);
             }
         }
         return $response;
     }
-
+    public function reject($news_title)
+    {
+        $admin_approval_news_title = AdminNewsApproval::where("news_title", $news_title)
+            ->select("id", "news_picture_name", "news_picture_path")->get();
+        $json_decode_approval = json_decode($admin_approval_news_title);
+        $id = $json_decode_approval[0]->id;
+        $news_picture_name = $json_decode_approval[0]->news_picture_name;
+        $news_picture_path = $json_decode_approval[0]->news_picture_path;
+        $delete_admin_approval = AdminNewsApproval::findOrFail($id);
+        $delete_admin_approval->delete();
+        if (File::exists($news_picture_path . "/" . $news_picture_name)) {
+            File::delete($news_picture_path . "/" . $news_picture_name);
+        }
+        return response()->json(["admin_approval" => $delete_admin_approval, "status" => "Success", "status_code" => 200, "You have rejected to create an author account"], 200);
+    }
     public function showNewsByTopics()
     {
         DB::enableQueryLog();

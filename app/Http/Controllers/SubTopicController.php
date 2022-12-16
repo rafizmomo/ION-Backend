@@ -48,10 +48,9 @@ class SubTopicController extends Controller
         $data["topic_id"] = intval($request->input("topic_id"));
         $response = null;
         $validator = Validator::make($request->all(), [
-            "sub_topic_title" => "required",
+            "sub_topic_title" => "required|unique:sub_topics",
             "topic_id" => "required",
         ]);
-
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
         } else {
@@ -91,7 +90,7 @@ class SubTopicController extends Controller
         );
         $response = null;
         $validator = Validator::make($request->all(), [
-            "sub_topic_title" => "request",
+            "sub_topic_title" => "request|unique:sub_topics",
             "topic_id" => "require|number"
         ]);
         if ($validator->fails()) {
