@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use App\Models\AdminNewsApproval;
 use App\Models\SubTopics;
 use App\Models\News;
+use App\Models\User;
 
 class AdminNewsApprovalController extends Controller
 {
@@ -79,5 +80,13 @@ class AdminNewsApprovalController extends Controller
             ->select("admin_news_approval.id", "admin_news_approval.news_title", "admin_news_approval.news_content", "admin_news_approval.news_picture_link", "admin_news_approval.news_picture_name", "sub_topics.sub_topic_title", "users.name", "users.id as user_id")
             ->get();
         return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);
+    }
+
+    public function updateBalance(Request $request, $user_id){
+        DB::table('users')
+        ->where('id', $user_id)
+        ->update([
+            'balance' => DB::raw('balance + 5000')
+        ]);
     }
 }
