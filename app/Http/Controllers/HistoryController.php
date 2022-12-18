@@ -21,55 +21,46 @@ class HistoryController extends Controller
 
     public function index($id = 'all')
     {
-        if($id == 'all'){
-            $history = History::with('news','user')->get();
-        }
-        else{
-            $history = History::with('news','user')->where('user_id', $id)->get();
+        if ($id == 'all') {
+            $history = History::with('news', 'user')->get();
+        } else {
+            $history = History::with('news', 'user')->where('user_id', $id)->get();
         }
         return response()->json(["history" => $history, "status" => "Success", "message" => "Succeed"], 202);
-
-        
     }
 
-    public function store(Request $request){
-        if(!isset($request['user_id'])){
+    public function store(Request $request)
+    {
+        if (!isset($request['user_id'])) {
             return response()->json(["status" => "Failed", "message" => "user_id empty"], 400);
         }
-        if(!isset($request['news_id'])){
+        if (!isset($request['news_id'])) {
             return response()->json(["status" => "Failed", "message" => "news_id empty"], 400);
         }
-        if(!User::find($request['user_id'])){
+        if (!User::find($request['user_id'])) {
             return response()->json(["status" => "Failed", "message" => "user not found"], 400);
         }
-        if(!News::find($request['news_id'])){
+        if (!News::find($request['news_id'])) {
             return response()->json(["status" => "Failed", "message" => "news not found"], 400);
-
         }
-        try{
+        try {
             History::create([
                 'user_id' => $request['user_id'],
                 'news_id' => $request['news_id']
             ]);
             return response()->json(["status" => "Success", "message" => "History stored"], 200);
-
-        }
-        catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json(["status" => "Failed", "message" => "DB Error"], 400);
-
         }
-        
     }
 
-    public function delete($id){
-        try{
-            History::where('user_id',$id)->delete();
+    public function delete($id)
+    {
+        try {
+            History::where('user_id', $id)->delete();
             return response()->json(["status" => "Success", "message" => "History deleted"], 200);
-
-        }
-        catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json(["status" => "Failed", "message" => "DB Error"], 400);
-
         }
     }
 
@@ -77,5 +68,4 @@ class HistoryController extends Controller
      * @param \Illuminate\Http\Request @request
      * @return \Illuminate\Http\Response
      */
-    
 }
