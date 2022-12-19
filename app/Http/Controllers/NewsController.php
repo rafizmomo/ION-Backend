@@ -4,25 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Models\News;
 use App\Models\Topics;
 use App\Models\SubTopics;
 use App\Models\AdminNewsApproval;
 use App\Http\Controllers\Controller as Controller;
-use App\Models\AdminApproval;
 use Exception;
 
 // Eager: Join
 // Lazy: Not Join
 class NewsController extends Controller
 {
-    //     o show data from a database based on a date when using epoch time, you will need to convert the epoch time to a human-readable date format. This can typically be done using a combination of the DATE() and FROM_UNIXTIME() functions, which are available in most databases. For example, if your database has a column named timestamp that contains epoch timestamps, you could use a query like the following to show only the rows with a timestamp from a specific date:
-    // Copy code
-    // SELECT * FROM my_table
-    // WHERE DATE(FROM_UNIXTIME(timestamp)) = '2022-12-13'
-    // This query will convert the epoch timestamps in the timestamp column to human-readable dates, and then only show the rows where the date matches the specified date. You can adjust the query as needed to match the specific requirements of your project.
 
     // convert this 1670906391017 to date on php where the date format is '%yyy-%m-%d'
     // $timestamp = 1670906391017;
@@ -74,6 +67,7 @@ class NewsController extends Controller
         $news_picture_path = null;
         $news_sub_topic_id = null;
         $user_id = null;
+        $response = null;
         if (AdminNewsApproval::where("news_title", $news_title)->first() != null) {
             $news_new = $json_decode[0]->news_title;
             $news_content = $json_decode[0]->news_content;
@@ -84,7 +78,6 @@ class NewsController extends Controller
             $news_sub_topic_id = $json_decode[0]->sub_topic_id;
             $user_id = $json_decode[0]->user_id;
         }
-        $response = null;
         if ($news_new != null) {
             try {
                 $data["news_title"] = $news_new;
@@ -127,7 +120,7 @@ class NewsController extends Controller
         $string_topic_slug = strval($topic_slug);
         $id = Topics::where("topic_slug", $string_topic_slug)->select("id")->get();
         $json_encode = json_decode($id);
-        return $json_encode[0]->id;
+        return response(["id" => $json_encode[0]->id, "status" => "success"], 200);
     }
     public function getSubTopicIdBySubTopicSlug(string $sub_topic_slug)
     {
@@ -136,15 +129,17 @@ class NewsController extends Controller
         $json_encode = json_decode($id);
         return $json_encode[0]->id;
     }
+
     public function showNewsByTopics()
     {
         $topics = Topics::with("news")->get();
         return response()->json($topics, 200);
     }
     // For home page in topic_home, visitor
-    public function showNewsByTopic($topic_id)
+    public function showNewsByTopic($topic_slug)
     {
         DB::enableQueryLog();
+        $topic = Topics::where("topic_slug", $topic_slug)->first();
         $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
             ->select(
                 "news.*",
@@ -152,13 +147,14 @@ class NewsController extends Controller
                 "sub_topics.added_at as sub_topic_added_at",
                 "sub_topics.updated_at as sub_topic_updated_at"
             )
-            ->where("sub_topics.topic_id", intval($topic_id))
+            ->where("sub_topics.topic_id", $topic->id)
             ->get();
-        return response()->json($join_news, 200);
+        return response($join_news, 200);
     }
-    public function showNewsBySubTopicsAndTopics(int $topic_id, int $sub_topic_id)
+    public function showNewsBySubTopicsAndTopics(string $sub_topic_slug)
     {
         DB::enableQueryLog();
+        $sub_topic = SubTopics::where("sub_topic_slug", $sub_topic_slug)->first();
         $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
             ->select(
                 "news.*",
@@ -166,10 +162,29 @@ class NewsController extends Controller
                 "sub_topics.added_at as sub_topic_added_at",
                 "sub_topics.updated_at as sub_topic_updated_at"
             )
-            ->where([["sub_topics.topic_id", intval($topic_id)], ["news.sub_topic_id", intval($sub_topic_id)]])
+            ->where([["news.sub_topic_id", intval($sub_topic->id)]])
             ->get();
         return response()->json($join_news, 200);
     }
+
+    public function showNewsByUserId(int $id)
+    {
+        DB::enableQueryLog();
+        $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
+            ->select(
+                "news.*",
+                "sub_topics.sub_topic_title",
+                "sub_topics.added_at as sub_topic_added_at",
+                "sub_topics.updated_at as sub_topic_updated_at",
+                "sub_topics.topic_id"
+            )
+            ->where("user_id", $id)
+            ->get();
+        $decode = json_decode($join_news);
+        $topic = Topics::find($decode[0]->topic_id);
+        return response()->json(["news" => $join_news, "topics" => $topic], 200);
+    }
+
     public function readingNews(int $topic_id, int $sub_topic_id, string $news_title)
     {
         DB::enableQueryLog();
@@ -188,5 +203,55 @@ class NewsController extends Controller
             ->where([["sub_topics.topic_id", intval($topic_id)], ["news.sub_topic_id", intval($sub_topic_id)], ["news.news_title", strval($news_title)]])
             ->get();
         return response()->json($join_news, 200);
+    }
+
+    public function getSubTopicByTopic(int $topic_id)
+    {
+        $sub_topic = SubTopics::where("topic_id", $topic_id);
+        return response()->json(["sub_topics" => $sub_topic, "status_code" => 200],);
+    }
+
+    public function updateNews(Request $request, int $news_id)
+    {
+        $news = News::findOrFail($news_id);
+        $image_file = $request->file("image_file");
+        $news_title = ucwords($request->news_title);
+        $news_content = $request->news_content;
+        $sub_topic_id = $request->sub_topic_id;
+        $decode = json_decode($news);
+        $image_path_dcode = $decode[0]->news_picture_path;
+        $image_name_dcode = $decode[0]->news_picture_name;
+        $directory = "storage";
+        $file_name = $image_file->getClientOriginalName();
+        $path_info = pathinfo($file_name);
+        $base_name = $path_info["filename"];
+        $updated_at = round(microtime(true) * 1000);
+        $counter = 1;
+        $extension_test = File::extension($directory . "/" . "news_image/" . $file_name);
+        $current_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
+        if (File::exists($directory . "/" . "news_image/" . $file_name)) {
+            if (File::exists($directory . "/" . "news_image/" . $current_counter_file)) {
+                do {
+                    $next_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
+                    $current_counter_file = $next_counter_file;
+                    $counter++;
+                } while (File::exists($directory . "/" . "news_image/" . $current_counter_file));
+                $file_name =  $current_counter_file;
+            } else {
+                $file_name = $current_counter_file;
+            }
+        } else {
+            $file_name = $image_file->getClientOriginalName();
+        }
+        $url = config("app.url");
+        $image_url_directory = stripslashes($url . "/" . $directory . "/news_image" . "/" . $file_name);
+        $data["news_title"] = $news_title;
+        $data["news_content"] = $news_content;
+        $data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title));
+        $data["news_picture_link"] = $image_url_directory;
+        $data["news_picture_name"] = $file_name;
+        $data["updated_at"] = $updated_at;
+        $news->update($data);
+        return response()->json(["news" => $data, "status_code" => 200], 200);
     }
 }

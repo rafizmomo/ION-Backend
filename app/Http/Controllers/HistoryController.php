@@ -49,7 +49,7 @@ class HistoryController extends Controller
                 'news_id' => $request['news_id']
             ]);
             return response()->json(["status" => "Success", "message" => "History stored"], 200);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["status" => "Failed", "message" => "DB Error"], 400);
         }
     }
@@ -59,7 +59,7 @@ class HistoryController extends Controller
         try {
             History::where('user_id', $id)->delete();
             return response()->json(["status" => "Success", "message" => "History deleted"], 200);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["status" => "Failed", "message" => "DB Error"], 400);
         }
     }

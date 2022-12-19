@@ -5,13 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Models\AdminNewsApproval;
-use App\Models\SubTopics;
-use App\Models\News;
-use App\Models\User;
+
 
 class AdminNewsApprovalController extends Controller
 {
@@ -61,7 +58,7 @@ class AdminNewsApprovalController extends Controller
                 } else {
                     $file_name = $direct_file;
                 }
-                $url = config("app.url");
+                $url = URL::to('');
                 $image_url_directory = stripslashes($url . "/" . $directory . "/news_image" . "/" . $file_name);
                 $news_data["news_picture_link"] = $image_url_directory;
                 $news_data["news_picture_name"] = $file_name;
@@ -82,11 +79,12 @@ class AdminNewsApprovalController extends Controller
         return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);
     }
 
-    public function updateBalance(Request $request, $user_id){
+    public function updateBalance($user_id)
+    {
         DB::table('users')
-        ->where('id', $user_id)
-        ->update([
-            'balance' => DB::raw('balance + 5000')
-        ]);
+            ->where('id', $user_id)
+            ->update([
+                'balance' => DB::raw('balance + 5000')
+            ]);
     }
 }
