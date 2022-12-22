@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AdminApproval;
-use App\Models\User;
 use Illuminate\Support\Facades\File;
 
 class AdminApprovalController extends Controller
@@ -51,8 +50,7 @@ class AdminApprovalController extends Controller
                 } else {
                     $file_name = $direct_file;
                 }
-                $url = config("app.url");
-                $image_url_directory = stripslashes($url . "/" . $directory . "/photo_profile" . "/" . $file_name);
+                $image_url_directory = stripslashes($request->schemeAndHttpHost() . "/" . $directory . "/photo_profile" . "/" . $file_name);
                 $author_data["photo_profile_link"] = $image_url_directory;
                 $author_data["photo_profile_name"] = $file_name;
                 $author_data["photo_profile_path"] = preg_replace("/\s+/", "", strtolower("storage/photo_profile"));

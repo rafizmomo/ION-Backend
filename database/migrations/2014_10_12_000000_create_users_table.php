@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string("author_description")->nullable();
             $table->string("role")->nullable();
+            $table->string("balance_account_numer", 15)->unique()->nullable();
             $table->unsignedDouble("balance")->nullable();
             $table->string("photo_profile_link", 150)->nullable();
             $table->string("photo_profile_name", 150)->nullable();

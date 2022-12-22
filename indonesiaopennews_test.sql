@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 16 Des 2022 pada 06.41
+-- Waktu pembuatan: 22 Des 2022 pada 14.40
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -80,7 +80,8 @@ CREATE TABLE `failed_jobs` (
 CREATE TABLE `history` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `created_at` datetime NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `news_id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -137,7 +138,7 @@ CREATE TABLE `news` (
 --
 
 INSERT INTO `news` (`id`, `news_title`, `news_content`, `news_slug`, `news_picture_link`, `news_picture_name`, `news_picture_path`, `added_at`, `updated_at`, `news_status`, `sub_topic_id`, `user_id`) VALUES
-(2, 'Test1k', 'testsss1m', 'test1k', 'http://localhost/storage/news_image/02.JPG', '02.JPG', 'storage/news_image', 1671165078094, NULL, 'Paid', 2, 1);
+(3, 'Ayo Test Update', 'test update', 'ayo-test-update', 'http://127.0.0.1:8000/storage/news_image/dewaweb-blog-segala-hal-tentang-website.png', 'dewaweb-blog-segala-hal-tentang-website.png', 'storage/news_image', 1671545259756, 1671612620772, 'Paid', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -190,8 +191,7 @@ CREATE TABLE `sub_topics` (
 --
 
 INSERT INTO `sub_topics` (`id`, `sub_topic_title`, `sub_topic_slug`, `added_at`, `updated_at`, `topic_id`) VALUES
-(1, 'Lklskdf', 'lklskdf', 1671100096475, 0, 1),
-(2, 'Test', 'test', 1671103947197, 0, 1);
+(2, 'Test Test', 'test-test', 1671537941739, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -212,7 +212,7 @@ CREATE TABLE `topics` (
 --
 
 INSERT INTO `topics` (`id`, `topic_title`, `topic_slug`, `added_at`, `updated_at`) VALUES
-(1, 'Test Again', 'test-again', 1671100090873, 0);
+(1, 'Aye', 'aye', 1671537866547, 0);
 
 -- --------------------------------------------------------
 
@@ -227,6 +227,7 @@ CREATE TABLE `users` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `author_description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `balance_account_numer` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `balance` double UNSIGNED DEFAULT NULL,
   `photo_profile_link` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `photo_profile_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -241,9 +242,8 @@ CREATE TABLE `users` (
 -- Dumping data untuk tabel `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `author_description`, `role`, `balance`, `photo_profile_link`, `photo_profile_name`, `photo_profile_path`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'Joshua Theo', 'joshuatheo196@gmail.com', 'joshuatheo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2022-12-15 03:25:28', '2022-12-15 03:25:28'),
-(2, 'Test_name', 'test_name@gmail.com', 'test_name', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2022-12-15 18:41:06', '2022-12-15 18:41:06');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `author_description`, `role`, `balance_account_numer`, `balance`, `photo_profile_link`, `photo_profile_name`, `photo_profile_path`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, 'joshua', 'joshuatheo@gmail.com', '$2y$10$auYVDAHp5a3gGlpb4FgUz.zHPDXTNMWwM/cXdmzO2uQk5/7bYiz2q', 'Hi my name is Joshua Theo Kurniawan. I have hobby namely playing game and singing.', 'admin', NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/01.JPG', '01.JPG', 'storage/photo_profile', NULL, NULL, '2022-12-19 23:39:44', '2022-12-21 02:10:19');
 
 --
 -- Indexes for dumped tables
@@ -261,7 +261,7 @@ ALTER TABLE `admin_approval`
 --
 ALTER TABLE `admin_news_approval`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `admin_news_approval_news_content_unique_key` (`news_title`),
+  ADD UNIQUE KEY `admin_news_approval_news_title_unique` (`news_title`),
   ADD KEY `admin_news_approval_sub_topic_id_foreign` (`sub_topic_id`),
   ADD KEY `admin_news_approval_user_id_foreign` (`user_id`);
 
@@ -277,7 +277,8 @@ ALTER TABLE `failed_jobs`
 --
 ALTER TABLE `history`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `history_user_id_foreign` (`user_id`);
+  ADD KEY `history_user_id_foreign` (`user_id`),
+  ADD KEY `history_news_id_foreign` (`news_id`);
 
 --
 -- Indeks untuk tabel `migrations`
@@ -327,7 +328,8 @@ ALTER TABLE `topics`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_unique` (`email`);
+  ADD UNIQUE KEY `users_email_unique` (`email`),
+  ADD UNIQUE KEY `users_balance_account_numer_unique` (`balance_account_numer`);
 
 --
 -- AUTO_INCREMENT untuk tabel yang dibuang
@@ -337,13 +339,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `admin_news_approval`
 --
 ALTER TABLE `admin_news_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `failed_jobs`
@@ -367,7 +369,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT untuk tabel `news`
 --
 ALTER TABLE `news`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `personal_access_tokens`
@@ -391,7 +393,7 @@ ALTER TABLE `topics`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
@@ -414,6 +416,7 @@ ALTER TABLE `admin_news_approval`
 -- Ketidakleluasaan untuk tabel `history`
 --
 ALTER TABLE `history`
+  ADD CONSTRAINT `history_news_id_foreign` FOREIGN KEY (`news_id`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `history_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --

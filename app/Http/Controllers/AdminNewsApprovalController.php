@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Models\AdminNewsApproval;
-
+use App\Models\SubTopics;
+use App\Models\User;
 
 class AdminNewsApprovalController extends Controller
 {
     public function makeApproval(Request $request, $user_id)
     {
-        $date_now = round(microtime(true) * 1000);
+        // $date_now = round(microtime(true) * 1000);
         $response = null;
         $image_file = $request->file("image_file");
         $file_name = $image_file->getClientOriginalName();
@@ -33,10 +34,11 @@ class AdminNewsApprovalController extends Controller
         $news_data["news_title"] = $news_title;
         $news_data["news_content"] = $news_content;
         $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title));
-        $news_data["sub_topic_id"] = $request->sub_topic_id;
-        $news_data["user_id"] = intval($user_id);
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
+        }
+        if (!SubTopics::find($request->sub_topic_id) && !User::find($user_id)) {
+            return response()->json(["message" => "Sub topic is not found and user id is not found"], 404);
         } else {
             $counter = 1;
             if (AdminNewsApproval::where("user_id", intval($user_id))->count() >= 2) {
@@ -58,11 +60,12 @@ class AdminNewsApprovalController extends Controller
                 } else {
                     $file_name = $direct_file;
                 }
-                $url = URL::to('');
-                $image_url_directory = stripslashes($url . "/" . $directory . "/news_image" . "/" . $file_name);
+                $image_url_directory = stripslashes($request->schemeAndHttpHost() . "/" . $directory . "/news_image" . "/" . $file_name);
                 $news_data["news_picture_link"] = $image_url_directory;
                 $news_data["news_picture_name"] = $file_name;
                 $news_data["news_picture_path"] = preg_replace("/\s+/", "", strtolower("storage/news_image"));
+                $news_data["sub_topic_id"] = $request->sub_topic_id;
+                $news_data["user_id"] = intval($user_id);
                 File::copy($image_file, $directory . "/" . "news_image/" . $file_name);
                 AdminNewsApproval::create($news_data);
                 $response = response()->json(["authors" => $news_data, "status" => "Success", "status_code" => 200, "message" => "You create a news. Please wait until approved"], 200);
@@ -79,7 +82,7 @@ class AdminNewsApprovalController extends Controller
         return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);
     }
 
-    public function updateBalance($user_id)
+    public function updateBalance(int $user_id)
     {
         DB::table('users')
             ->where('id', $user_id)

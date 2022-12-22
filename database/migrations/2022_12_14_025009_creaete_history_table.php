@@ -19,6 +19,8 @@ return new class extends Migration
             $table->dateTime('created_at');
             $table->unsignedBigInteger("user_id", false);
             $table->foreign("user_id")->references("id")->on("users")->cascadeOnDelete()->cascadeOnUpdate();
+            $table->unsignedBigInteger("news_id", false);
+            $table->foreign("news_id")->references("id")->on("news")->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

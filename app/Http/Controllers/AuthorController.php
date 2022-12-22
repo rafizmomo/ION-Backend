@@ -34,7 +34,7 @@ class AuthorController extends Controller
         $create_author_role = User::find(intval($user_id_from_admin_approval));
         $data_author = array(
             "author_description" => $user_author_description_from_admin_approval,
-            "role" => "Author",
+            "role" => "author",
             "photo_profile_link" => $image_url_directory,
             "photo_profile_name" => $user_photo_profile_name_from_admin_approval,
             "photo_profile_path" => $user_photo_profile_path_from_admin_approval

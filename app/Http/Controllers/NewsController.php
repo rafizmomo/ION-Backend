@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\URL;
 use App\Models\News;
 use App\Models\Topics;
 use App\Models\SubTopics;
@@ -213,22 +214,23 @@ class NewsController extends Controller
 
     public function updateNews(Request $request, int $news_id)
     {
-        $news = News::findOrFail($news_id);
-        $image_file = $request->file("image_file");
+        $news = News::where("id", $news_id)->get();
+        $update_news = News::findOrFail($news_id);
         $news_title = ucwords($request->news_title);
         $news_content = $request->news_content;
+        $file_image = $request->file("image_file");
         $sub_topic_id = $request->sub_topic_id;
-        $decode = json_decode($news);
-        $image_path_dcode = $decode[0]->news_picture_path;
-        $image_name_dcode = $decode[0]->news_picture_name;
         $directory = "storage";
-        $file_name = $image_file->getClientOriginalName();
+        $file_name = $file_image->getClientOriginalName();
         $path_info = pathinfo($file_name);
         $base_name = $path_info["filename"];
         $updated_at = round(microtime(true) * 1000);
         $counter = 1;
-        $extension_test = File::extension($directory . "/" . "news_image/" . $file_name);
+        $extension_test = File::extension($file_name);
         $current_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
+        if (File::exists($news->value("news_picture_path") . "/" . $news->value("news_picture_name"))) {
+            File::delete($news->value("news_picture_path") . "/" . $news->value("news_picture_name"));
+        }
         if (File::exists($directory . "/" . "news_image/" . $file_name)) {
             if (File::exists($directory . "/" . "news_image/" . $current_counter_file)) {
                 do {
@@ -241,17 +243,27 @@ class NewsController extends Controller
                 $file_name = $current_counter_file;
             }
         } else {
-            $file_name = $image_file->getClientOriginalName();
+            $file_name = $file_image->getClientOriginalName();
         }
-        $url = config("app.url");
-        $image_url_directory = stripslashes($url . "/" . $directory . "/news_image" . "/" . $file_name);
+        $image_url_directory = stripslashes($request->schemeAndHttpHost() . "/" . $directory . "/news_image" . "/" . $file_name);
         $data["news_title"] = $news_title;
         $data["news_content"] = $news_content;
         $data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title));
         $data["news_picture_link"] = $image_url_directory;
         $data["news_picture_name"] = $file_name;
         $data["updated_at"] = $updated_at;
-        $news->update($data);
+        $data['sub_topic_id'] = $sub_topic_id;
+        File::copy($file_image, $directory . "/" . "news_image/" . $file_name);
+        $update_news->update($data);
         return response()->json(["news" => $data, "status_code" => 200], 200);
+    }
+
+    public function delete(int $news_id)
+    {
+        $news = News::findOrFail($news_id);
+        if (File::exists("storage/news_image/" . $news->news_picture_name)) {
+            File::delete("storage/news_image/" . $news->news_picture_name);
+        }
+        $news->delete();
     }
 }

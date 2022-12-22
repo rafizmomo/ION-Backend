@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\LoginController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TopicController;
@@ -9,6 +9,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubTopicController;
 use App\Http\Controllers\AdminApprovalController;
 use App\Http\Controllers\AdminNewsApprovalController;
+use App\Http\Controllers\UpdateNewsController;
 use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
@@ -21,28 +22,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::post("/register", [AuthController::class, "signup"]);
-/**
- * route "/login"
- * @method "POST"
- */
-Route::post('/login', App\Http\Controllers\LoginController::class)->name('login');
-// Route::post('/register', App\Http\Controllers\LoginController::class)->name('signup');
-Route::post('/register/admin', [UserController::class, "signupAdmin"]);
-Route::post('/register/author', [UserController::class, "signupAuthor"]);
+Route::controller(AuthController::class)->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
+    Route::post('logout', 'logout');
+    Route::post('refresh', 'refresh');
+});
+
+// Route::post('/register', [UserController::class, 'register']);
 Route::put('/register/approve/{user_id}', [UserController::class, "approve"]);
 Route::post('/login/admin', [UserController::class, "loginAdmin"]);
 Route::post('/login/author', [UserController::class, "loginAuthor"]);
-Route::get("/userprofile/{id}", [UserController::class, "userProfile"]);
+
+// Users
+Route::post("user/author/profile/{user_id}", [UserController::class, "updateUser"]);
+Route::get("user/author/profile/{id}", [UserController::class, "userProfile"]);
 
 // News Routes
-// Route::get("/gettopicidbytopicslug/{topic_slug}", [NewsController::class, "getTopicIdByTopicSlug"]);
-// Route::get("/getsubtopicidbysubtopicslug/{topic_slug}", [NewsController::class, "getSubTopicIdBySubTopicSlug"]);
 Route::get("topics/news", [NewsController::class, "showNewsByTopics"]);
 Route::get("topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
 Route::get("topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
 Route::get("topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
 Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);
+Route::post("news/{news_id}", [NewsController::class, "updateNews"]);
+Route::delete("news/{news_id}", [NewsController::class, "delete"]);
 
 Route::get("/sub_topics", [SubTopicController::class, "index"]);
 Route::get("/sub_topics{sub_topics}", [SubTopicController::class, "show"]);

@@ -8,15 +8,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\AdminApproval;
-// use PHPOpenSourceSaver\JWTAuth\Contcracts\JWTSubject;
-// use PHPOpenSourceSaver\JWTAuth\Cont
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
     protected $table = "users";
-    public $timesstamps = false;
+    const CREATED_AT = 'created';
+    const UPDATED_AT = 'modified';
     /**
      * The attributes that are mass assignable.
      *
@@ -29,6 +28,7 @@ class User extends Authenticatable
         'author_description',
         'role',
         'balance',
+        'balance_account_number',
         'photo_profile_link',
         'photo_profile_name',
         'photo_profile_path',
@@ -71,10 +71,5 @@ class User extends Authenticatable
     public function getJWTCustomClaims()
     {
         return [];
-    }
-
-    public function adminapproval()
-    {
-        $this->hasMany(AdminApproval::class);
     }
 }

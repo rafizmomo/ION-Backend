@@ -29,24 +29,24 @@ class HistoryController extends Controller
         return response()->json(["history" => $history, "status" => "Success", "message" => "Succeed"], 202);
     }
 
-    public function store(Request $request)
+    public function store(int $user_id, int $news_id)
     {
-        if (!isset($request['user_id'])) {
+        if (!isset($user_id)) {
             return response()->json(["status" => "Failed", "message" => "user_id empty"], 400);
         }
-        if (!isset($request['news_id'])) {
+        if (!isset($news_id)) {
             return response()->json(["status" => "Failed", "message" => "news_id empty"], 400);
         }
-        if (!User::find($request['user_id'])) {
+        if (!User::find($user_id)) {
             return response()->json(["status" => "Failed", "message" => "user not found"], 400);
         }
-        if (!News::find($request['news_id'])) {
+        if (!News::find($news_id)) {
             return response()->json(["status" => "Failed", "message" => "news not found"], 400);
         }
         try {
             History::create([
-                'user_id' => $request['user_id'],
-                'news_id' => $request['news_id']
+                'user_id' => $user_id,
+                'news_id' => $news_id
             ]);
             return response()->json(["status" => "Success", "message" => "History stored"], 200);
         } catch (\Exception $e) {
