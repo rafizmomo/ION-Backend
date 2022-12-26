@@ -77,6 +77,7 @@ class AdminNewsApprovalController extends Controller
     {
         $approval_list = DB::table("admin_news_approval")->join("users", "users.id", "=", "admin_news_approval.user_id")
             ->join("sub_topics", "sub_topics.id", "=", "admin_news_approval.sub_topic_id")
+            ->where("users.role", "author")
             ->select("admin_news_approval.id", "admin_news_approval.news_title", "admin_news_approval.news_content", "admin_news_approval.news_picture_link", "admin_news_approval.news_picture_name", "sub_topics.sub_topic_title", "users.name", "users.id as user_id")
             ->get();
         return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);

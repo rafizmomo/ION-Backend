@@ -35,13 +35,6 @@ class TopicController extends Controller
         return response()->json(["topics" => $topics, "status" => "Success", "message" => "Succeed show topic"], 202);
     }
 
-    public function test()
-    {
-        DB::enableQueryLog();
-        $topics = Topics::with("news")->get();
-        DB::getQueryLog();
-        return response()->json($topics, 200);
-    }
     /**
      * @param \Illuminate\Http\Request @request
      * @return \Illuminate\Http\Response 

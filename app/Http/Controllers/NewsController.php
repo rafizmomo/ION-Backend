@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\URL;
 use App\Models\News;
 use App\Models\Topics;
 use App\Models\SubTopics;
@@ -42,8 +41,8 @@ class NewsController extends Controller
     // }
     function index()
     {
-        $news = SubTopics::with("news")->join("news", "news.id", "=", "news_sub_topics.news_sub_topic_id")->select("news.*", "news_sub_topics.*")->get();
-        return response()->join($news, 200);
+        $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_link")->where("role", "author")->get();
+        return response()->json($news, 200);
     }
     public function showNewsForAdminReview()
     {
@@ -133,9 +132,11 @@ class NewsController extends Controller
 
     public function showNewsByTopics()
     {
+        DB::enableQueryLog();
         $topics = Topics::with("news")->get();
         return response()->json($topics, 200);
     }
+
     // For home page in topic_home, visitor
     public function showNewsByTopic($topic_slug)
     {

@@ -11,21 +11,47 @@ use App\Models\User;
 class UserController extends Controller
 {
 
+    public function showAllAuthors()
+    {
+        $authors = User::where("role", "author")->get();
+        return response()->json($authors, 200);
+    }
+
     public function registerAdmin(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|confirmed|min:6',
+            'password' => 'required|string|min:6',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        $user = User::create(["name" => $request->name, "email" => $request->email, 'password' => $request->passwor, "role" => "author"]);
+        $user = User::create(["name" => $request->name, "email" => $request->email, 'password' => $request->password, "role" => "author"]);
         return response()->json([
             'message' => 'User successfully registered',
             'user' => $user
         ], 201);
+    }
+
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|between:2,100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'password' => 'required|string|min:6',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        $user = User::create(["name" => $request->name, "email" => $request->email, 'password' => $request->password]);
+        return response()->json(
+            [
+                'message' => 'User successfully registered',
+                'user' => $user
+            ],
+            201
+        );
     }
 
     // public function approve(Request $request, $user_id)
@@ -45,7 +71,7 @@ class UserController extends Controller
         $user = User::where(['email' => $email, 'password' => $password])->first();
         if ($user) {
             if ($user->role == 'admin') {
-                return response()->json(['status' => 'sukses']);
+                return response()->json(['status' => 'sukses', "user" => $user->id]);
             } else {
                 return response()->json(['status' => 'user tidak ditemukan']);
             }
@@ -54,17 +80,13 @@ class UserController extends Controller
         }
     }
 
-    public function loginAuthor(Request $request)
+    public function loginUser(Request $request)
     {
         $email = $request->input('email');
         $password = $request->input('password');
         $user = User::where(['email' => $email, 'password' => $password])->first();
         if ($user) {
-            if ($user->role == 'author') {
-                return response()->json(['status' => 'sukses', "user" => $user]);
-            } else {
-                return response()->json(['status' => 'user tidak ditemukan']);
-            }
+            return response()->json(['status' => 'sukses', "user" => $user->id]);
         } else {
             return response()->json(['status' => 'user tidak ditemukan']);
         }
@@ -83,7 +105,7 @@ class UserController extends Controller
         $count = 1;
         $current_count_file = $base_name . "_" . $count . $extension;
         if (File::exists($user->photo_profile_path . "/" . $user->photo_profile_name)) {
-            // File::delete($user->photo_profile_path . "/" . $user->photo_profile_name);
+            File::delete($user->photo_profile_path . "/" . $user->photo_profile_name);
         }
         if (File::exists($user->photo_profile_path . "/" . $file_name)) {
             if (File::exists($user->photo_profile_name . "/" . $current_count_file)) {

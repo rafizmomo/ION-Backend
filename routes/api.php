@@ -9,8 +9,8 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubTopicController;
 use App\Http\Controllers\AdminApprovalController;
 use App\Http\Controllers\AdminNewsApprovalController;
-use App\Http\Controllers\UpdateNewsController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,21 +29,27 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 });
 
-// Route::post('/register', [UserController::class, 'register']);
-Route::put('/register/approve/{user_id}', [UserController::class, "approve"]);
-Route::post('/login/admin', [UserController::class, "loginAdmin"]);
-Route::post('/login/author', [UserController::class, "loginAuthor"]);
+Route::get("/token", function (Request $request) {
+    return $request->session()->token();
+});
+
+// Route::put('/register/approve/{user_id}', [UserController::class, "approve"]);
 
 // Users
-Route::post("user/author/profile/{user_id}", [UserController::class, "updateUser"]);
-Route::get("user/author/profile/{id}", [UserController::class, "userProfile"]);
-
+Route::post("user/profile/{user_id}", [UserController::class, "updateUser"]); //update news
+Route::get("userprofile/{id}", [UserController::class, "userProfile"]);
+Route::post('/login/admin', [UserController::class, "loginAdmin"]);
+Route::post('/login/user', [UserController::class, "loginUser"]);
+Route::post("user/register", [UserController::class, "register"]);
+Route::post('/registeradmin', [UserController::class, 'registerAdmin']);
+Route::get("/authors", [UserController::class, "showAllAuthors"]);
 // News Routes
 Route::get("topics/news", [NewsController::class, "showNewsByTopics"]);
 Route::get("topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
 Route::get("topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
 Route::get("topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
 Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);
+Route::get("news", [NewsController::class, "index"]);
 Route::post("news/{news_id}", [NewsController::class, "updateNews"]);
 Route::delete("news/{news_id}", [NewsController::class, "delete"]);
 
@@ -61,7 +67,6 @@ Route::delete("/history/{id}", [HistoryController::class, "delete"]);
 Route::patch("/topics/{id}", [TopicController::class, "update"]);
 Route::delete("/topics/{id}", [TopicController::class, "delete"]);
 
-Route::get("/user", [UserController::class, "getAllUser"]);
 Route::post("/logout", [AuthController::class, "signout"]);
 
 // Admin Approval Routes

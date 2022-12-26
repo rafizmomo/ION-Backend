@@ -28,14 +28,12 @@ class AuthorController extends Controller
         $user_photo_profile_name_from_admin_approval = $json_decode_approval[0]->photo_profile_name;
         $user_author_description_from_admin_approval = $json_decode_approval[0]->author_description;
         $directory = "storage/photo_profile";
-        $url = config("app.url");
-        $image_url_directory = stripslashes($url . "/" . $directory . "/" . $user_photo_profile_name_from_admin_approval);
         $delete_admin_approval = AdminApproval::findOrFail($id);
         $create_author_role = User::find(intval($user_id_from_admin_approval));
         $data_author = array(
             "author_description" => $user_author_description_from_admin_approval,
             "role" => "author",
-            "photo_profile_link" => $image_url_directory,
+            "photo_profile_link" => $admin_approval_user->value("photo_profile_link"),
             "photo_profile_name" => $user_photo_profile_name_from_admin_approval,
             "photo_profile_path" => $user_photo_profile_path_from_admin_approval
         );

@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    //
     public function __construct()
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
@@ -31,40 +30,29 @@ class AuthController extends Controller
                 'message' => 'Unauthorized',
             ], 401);
         }
-        $user = Auth::user();
-        $test_role = User::where('email', $request->email)->first();
-        if ($user && $test_role) {
-            if ($test_role->role == "author" || $test_role->role == "admin") {
-                return response()->json([
-                    'status' => 'success',
-                    'user' => $user,
-                    'authorisation' => [
-                        'token' => $token,
-                        'type' => 'bearer',
-                    ]
-                ]);
-            } else {
-                return response()->json(["message" => "fail"], 400);
-            }
-        }
+        $user = Auth::user()->id;
+        return response()->json([
+            'status' => 'success',
+            'data' => $user,
+            // 'authorisation' => [
+            //     // 'token' => $token,
+            //     'type' => 'bearer',
+            // ]
+        ]);
     }
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            "name" => "required|string",
-            "email" => "required|unique:users|string",
-            "password" => "required|min:5"
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|min:6',
         ]);
 
-        if ($validator->fails()) {
-            return $validator->errors()->toJson();
-        }
-
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $request->input("name"),
+            'email' => $request->input("email"),
+            'password' => Hash::make($request->input("password")),
         ]);
 
         $token = Auth::login($user);

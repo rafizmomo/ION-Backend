@@ -13,9 +13,8 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
-    protected $table = "users";
-    const CREATED_AT = 'created';
-    const UPDATED_AT = 'modified';
+    // protected $table = "users";
+
     /**
      * The attributes that are mass assignable.
      *
