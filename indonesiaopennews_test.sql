@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 22 Des 2022 pada 14.40
+-- Waktu pembuatan: 26 Des 2022 pada 16.41
 -- Versi server: 10.4.21-MariaDB
 -- Versi PHP: 8.0.10
 
@@ -138,7 +138,8 @@ CREATE TABLE `news` (
 --
 
 INSERT INTO `news` (`id`, `news_title`, `news_content`, `news_slug`, `news_picture_link`, `news_picture_name`, `news_picture_path`, `added_at`, `updated_at`, `news_status`, `sub_topic_id`, `user_id`) VALUES
-(3, 'Ayo Test Update', 'test update', 'ayo-test-update', 'http://127.0.0.1:8000/storage/news_image/dewaweb-blog-segala-hal-tentang-website.png', 'dewaweb-blog-segala-hal-tentang-website.png', 'storage/news_image', 1671545259756, 1671612620772, 'Paid', 2, 1);
+(4, 'Ayo', 'testsss1m', 'ayo', 'http://127.0.0.1:8000/storage/news_image/02.JPG', '02.JPG', 'storage/news_image', 1671976778008, NULL, 'Paid', 2, 2),
+(5, 'Ayo', 'testsss1m', 'ayo', 'http://127.0.0.1:8000/storage/news_image/02_1.JPG', '02_1.JPG', 'storage/news_image', 1671980850170, NULL, 'Paid', 2, 2);
 
 -- --------------------------------------------------------
 
@@ -212,7 +213,14 @@ CREATE TABLE `topics` (
 --
 
 INSERT INTO `topics` (`id`, `topic_title`, `topic_slug`, `added_at`, `updated_at`) VALUES
-(1, 'Aye', 'aye', 1671537866547, 0);
+(1, 'Aye', 'aye', 1671537866547, 0),
+(2, 'Test Topic', 'test-topic', 1671877263791, 0),
+(3, 'Test Topic 1', 'test-topic-1', 1671877731948, 0),
+(4, 'Test Topic 2', 'test-topic-2', 1671877734856, 0),
+(5, 'Test Topic 3', 'test-topic-3', 1671877737879, 0),
+(6, 'Test Topic 4', 'test-topic-4', 1671877741733, 0),
+(7, 'Test Topic 5', 'test-topic-5', 1671877746501, 0),
+(8, 'Test Topic 6', 'test-topic-6', 1671877750489, 0);
 
 -- --------------------------------------------------------
 
@@ -243,7 +251,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `author_description`, `role`, `balance_account_numer`, `balance`, `photo_profile_link`, `photo_profile_name`, `photo_profile_path`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES
-(1, 'joshua', 'joshuatheo@gmail.com', '$2y$10$auYVDAHp5a3gGlpb4FgUz.zHPDXTNMWwM/cXdmzO2uQk5/7bYiz2q', 'Hi my name is Joshua Theo Kurniawan. I have hobby namely playing game and singing.', 'admin', NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/01.JPG', '01.JPG', 'storage/photo_profile', NULL, NULL, '2022-12-19 23:39:44', '2022-12-21 02:10:19');
+(2, 'Joshua Theo Kurniawan Siregar', 'joshua@gmail.com', 'password', 'Hi my name is Joshua Theo Kurniawan. I have hobby namely playing game and singing.', 'author', NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/01_1.JPG', '01_1.JPG', 'storage/photo_profile', NULL, NULL, '2022-12-23 06:19:32', '2022-12-25 07:10:37'),
+(3, 'test', 'joshuatest@gmail.com', 'joshuatheokur', 'Hi my name is Joshua Theo Kurniawan. I have hobby namely playing game and singing.', 'author', NULL, NULL, 'http://127.0.0.1:8000/storage/photo_profile/adminfix.jpg', 'adminfix.jpg', 'storage/photo_profile', NULL, NULL, '2022-12-25 08:30:31', '2022-12-25 08:32:22'),
+(4, 'Test User', 'test@example.com', 'adminssss', NULL, 'admin', NULL, NULL, NULL, NULL, NULL, '2022-12-25 20:55:36', 'cq5Kapwwuf', '2022-12-25 20:55:42', '2022-12-25 20:55:42');
 
 --
 -- Indexes for dumped tables
@@ -339,13 +349,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `admin_approval`
 --
 ALTER TABLE `admin_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `admin_news_approval`
 --
 ALTER TABLE `admin_news_approval`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `failed_jobs`
@@ -369,7 +379,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT untuk tabel `news`
 --
 ALTER TABLE `news`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `personal_access_tokens`
@@ -387,13 +397,13 @@ ALTER TABLE `sub_topics`
 -- AUTO_INCREMENT untuk tabel `topics`
 --
 ALTER TABLE `topics`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
