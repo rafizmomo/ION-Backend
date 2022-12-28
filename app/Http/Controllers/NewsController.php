@@ -147,7 +147,7 @@ class NewsController extends Controller
     {
         DB::enableQueryLog();
         $topic = Topics::where("topic_slug", $topic_slug)->first();
-        $join_news = DB::table("news")->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
+        $join_news = News::join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
             ->select(
                 "news.*",
                 "sub_topics.sub_topic_title",

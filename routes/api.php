@@ -44,11 +44,11 @@ Route::post("user/register", [UserController::class, "register"]);
 Route::post('/registeradmin', [UserController::class, 'registerAdmin']);
 Route::get("/authors", [UserController::class, "showAllAuthors"]);
 // News Routes
-Route::get("topics/news", [NewsController::class, "showNewsByTopics"]);
-Route::get("topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
-Route::get("topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
-Route::get("topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
-Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);
+Route::get("news/topics", [NewsController::class, "showNewsByTopics"]);
+Route::get("news/topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
+Route::get("news/topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
+Route::get("news/topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
+Route::get("news/topics/user/{id}", [NewsController::class, "showNewsByUserId"]);
 Route::get("news", [NewsController::class, "index"]);
 Route::post("news/{news_id}", [NewsController::class, "updateNews"]);
 Route::delete("news/{news_id}", [NewsController::class, "delete"]);
