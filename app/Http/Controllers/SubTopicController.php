@@ -25,9 +25,10 @@ class SubTopicController extends Controller
     /**
      * @return \Illuminate\Http\Response
      */
-    public function show(SubTopics $sub_topics)
+    public function show(string $sub_topic_slug)
     {
-        return response()->json(["sub_topics" => $sub_topics, "status" => "Success", "message" => "Successfully sub topic"], 202);
+        $subtopics = SubTopics::where("sub_topic_slug", $sub_topic_slug)->first();
+        return response()->json(["sub_topics" => $subtopics, "status" => "Success", "message" => "Successfully sub topic"], 202);
     }
 
     /**
@@ -36,7 +37,6 @@ class SubTopicController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-
         $lower_str = strtolower($request->input("sub_topic_title"));
         $no_whitespace = preg_replace("/\s+/", "-", $lower_str);
         $added_at = round(microtime(true) * 1000);
@@ -90,8 +90,8 @@ class SubTopicController extends Controller
         );
         $response = null;
         $validator = Validator::make($request->all(), [
-            "sub_topic_title" => "request|unique:sub_topics",
-            "topic_id" => "require|number"
+            "sub_topic_title" => "required|unique:sub_topics",
+            "topic_id" => "required"
         ]);
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);

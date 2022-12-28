@@ -54,18 +54,19 @@ Route::post("news/{news_id}", [NewsController::class, "updateNews"]);
 Route::delete("news/{news_id}", [NewsController::class, "delete"]);
 
 Route::get("/sub_topics", [SubTopicController::class, "index"]);
-Route::get("/sub_topics{sub_topics}", [SubTopicController::class, "show"]);
+Route::get("/sub_topics{sub_topic_slug}", [SubTopicController::class, "show"]);
 Route::post("/sub_topics", [SubTopicController::class, "store"]);
-Route::patch("/sub_topics/{id}", [SubTopicController::class, "update"]);
-Route::patch("/sub_topics/{id}", [SubTopicController::class, "delete"]);
+Route::post("/sub_topics/{id}", [SubTopicController::class, "update"]);
+Route::delete("/sub_topics/{id}", [SubTopicController::class, "delete"]);
 Route::get("/topics", [TopicController::class, "index"]);
-Route::get("/showtopic/{topics}", [TopicController::class, "show"]);
+Route::get("/topics/{topic_slug}", [TopicController::class, "show"]);
 Route::post("/topics", [TopicController::class, "save"]);
+Route::post("/topics/{id}", [TopicController::class, "update"]);
+Route::delete("/topics/{id}", [TopicController::class, "delete"]);
 Route::get("/history/{id?}", [HistoryController::class, "index"]);
 Route::post("/history", [HistoryController::class, "store"]);
 Route::delete("/history/{id}", [HistoryController::class, "delete"]);
-Route::patch("/topics/{id}", [TopicController::class, "update"]);
-Route::delete("/topics/{id}", [TopicController::class, "delete"]);
+
 
 Route::post("/logout", [AuthController::class, "signout"]);
 
@@ -78,7 +79,7 @@ Route::prefix("adminapproval/author")->group(function () {
 });
 Route::get("/adminapproval/news", [AdminNewsApprovalController::class, "showAdminNewsApproval"]);
 Route::post("/adminapproval/news/{user_id}", [AdminNewsApprovalController::class, "makeApproval"]);
-Route::put("/adminapproval/news/balance/{user_id}", [AdminNewsApprovalController::class, "updateBalance"]);
+Route::post("/adminapproval/news/balance/{user_id}", [AdminNewsApprovalController::class, "updateBalance"]);
 Route::prefix("adminapproval/news")->group(function () {
     route::post("approve/{news_title}", [NewsController::class, "approve"]);
     route::post("reject/{news_title}", [NewsController::class, "reject"]);

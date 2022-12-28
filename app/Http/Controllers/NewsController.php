@@ -39,7 +39,7 @@ class NewsController extends Controller
     //     return $test;
     //     dd(\DB::getQueryLog());
     // }
-    function index()
+    public function index()
     {
         $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_link")->where("role", "author")->get();
         return response()->json($news, 200);
@@ -50,6 +50,11 @@ class NewsController extends Controller
             // ->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
             ->select("news.*", "authors.*")->get();
         return response()->json($news, 200);
+    }
+
+    public function searchNewsByNewsTitle()
+    {
+        $news = News::join("users", "users.id", "=", "news.user");
     }
     /**
      * @param \Illuminate\Http\Request $request

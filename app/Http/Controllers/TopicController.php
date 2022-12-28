@@ -30,8 +30,9 @@ class TopicController extends Controller
      * @param \Illuminate\Http\Request @request
      * @return \Illuminate\Http\Response
      */
-    public function show(Topics $topics)
+    public function show(string $topic_slug)
     {
+        $topics = Topics::where("topic_slug", $topic_slug)->get();
         return response()->json(["topics" => $topics, "status" => "Success", "message" => "Succeed show topic"], 202);
     }
 
@@ -41,11 +42,11 @@ class TopicController extends Controller
      */
     function save(Request $request): JsonResponse
     {
-        $lower_case = strtolower($request->topic_title);
+        $lower_case = strtolower($request->input("topic_title"));
         $no_whitespace = preg_replace("/\s+/", "-", $lower_case);
         $added_at = round(microtime(true) * 1000);
-        $topic_exist = Topics::where("topic_title", $request->topic_title)->first();
-        $topic["topic_title"] = ucwords($request->topic_title);
+        $topic_exist = Topics::where("topic_title", $request->input("topic_title"))->first();
+        $topic["topic_title"] = ucwords($request->input("topic_title"));
         $topic["topic_slug"] = $no_whitespace;
         $topic["added_at"] = $added_at;
         $topic["updated_at"] = 0;
@@ -70,18 +71,20 @@ class TopicController extends Controller
         $updated_at = round(microtime(true) * 1000);
         $topic_update = Topics::findOrFail($id);
         $array_update = array(
-            "topic_title" => $topic_title_capitalize,
+            "topic_title" => ucwords($request->input("topic_title")),
             "topic_slug" => $topic_slug,
             "updated_at" => $updated_at,
         );
         $response = null;
+        $topic_update->update($array_update);
+        $response = response()->json(["topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Succeed to update"], 200);
         if ($this->TopicWithCondition("topic_title", $topic_title_capitalize) != null) {
             $json_encode = json_encode(Topics::where("topic_title", $topic_title_capitalize)->select("id", "topic_title")->get());
             $json_decode_id =  json_decode($json_encode)[0]->id;
-            $json_decode_sub_topic_title =  json_decode($json_encode)[0]->topic_title;
+            $json_decode_topic_title =  json_decode($json_encode)[0]->topic_title;
             $json_encode_topic_byid = json_encode(Topics::where("id", $id)->select("id", "topic_title")->get());
             $json_decode_topic_byid =  json_decode($json_encode_topic_byid)[0]->id;
-            if ($id == $json_decode_id && $topic_title_capitalize == $json_decode_sub_topic_title) {
+            if ($id == $json_decode_id && $json_decode_topic_title == $topic_title_capitalize) {
                 $topic_update->update($array_update);
                 $response = response()->json(["topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Succedd to update"], 200);
             } else if ($id == $json_decode_topic_byid && $this->TopicWithCondition("topic_title", $topic_title_capitalize)->get() != null) {
