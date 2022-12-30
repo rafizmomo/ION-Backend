@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Models\User;
+use Illuminate\Contracts\Support\Jsonable;
 
 class UserController extends Controller
 {
@@ -38,7 +39,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
+            'email' => 'required|email|max:100|unique:users',
             'password' => 'required|string|min:6',
         ]);
         if ($validator->fails()) {
@@ -48,10 +49,53 @@ class UserController extends Controller
         return response()->json(
             [
                 'message' => 'User successfully registered',
-                'user' => $user
+                'user' => $user["id"],
             ],
-            201
+            200
         );
+    }
+
+    public function loginAdmin(Request $request)
+    {
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $user = User::where(['email' => $email, 'password' => $password])->first();
+        if ($user) {
+            if ($user->role == 'admin') {
+                return response()->json(['status' => 'sukses', "user" => $user->id]);
+            } else {
+                return response()->json(['status' => "success", "messages" => "You are not admin"], 401);
+            }
+        } else {
+            return response()->json(['status' => 'user tidak ditemukan', "messages" => ["Email is wrong", "Password is wrong"]], 400);
+        }
+    }
+
+    public function loginUser(Request $request)
+    {
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $validation = Validator::make($request->all(), [
+            'email' => 'required|email|max:100',
+            'password' => 'required|string|min:6',
+        ]);
+        if ($validation->fails()) {
+            return response()->json(['status' => "fail", "rule_error_messages" => $validation->errors()->toJson()], 400);
+        }
+        if (!(User::where(["email" => $email], ["password" => $password])->first())) {
+            return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["email" => ["Email is wrong"], "password" => ["Password is wrong"]])], 401);
+        } else if (!(User::where("email", $email)->first())) {
+            return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["email" => ["Email is wrong"]])], 401);
+        } else if (!(User::where("password", $password)->first())) {
+            return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["password" => ["Password is wrong"]])], 401);
+        } else {
+            if (User::where(['email' => $email, 'password' => $password])->first()) {
+                return response()->json(['status' => 'sukses', "user" => User::where(['email' => $email, 'password' => $password])->first()->id], 200);
+            }
+        }
+        if (User::where(['email' => $email, 'password' => $password])->first() && User::where(['email' => $email, 'password' => $password])->first()->role == "admin") {
+            return response()->json(['status' => "fail", "error_type" => "admin is not authorized", "message" => "You are not authorized"], 401);
+        }
     }
 
     // public function approve(Request $request, $user_id)
@@ -62,35 +106,6 @@ class UserController extends Controller
     //             'role' => "author"
     //         ]);
     // }
-
-    public function loginAdmin(Request $request)
-    {
-        $email = $request->input('email');
-        $password = $request->input('password');
-
-        $user = User::where(['email' => $email, 'password' => $password])->first();
-        if ($user) {
-            if ($user->role == 'admin') {
-                return response()->json(['status' => 'sukses', "user" => $user->id]);
-            } else {
-                return response()->json(['status' => 'user tidak ditemukan']);
-            }
-        } else {
-            return response()->json(['status' => 'user tidak ditemukan']);
-        }
-    }
-
-    public function loginUser(Request $request)
-    {
-        $email = $request->input('email');
-        $password = $request->input('password');
-        $user = User::where(['email' => $email, 'password' => $password])->first();
-        if ($user) {
-            return response()->json(['status' => 'sukses', "user" => $user->id]);
-        } else {
-            return response()->json(['status' => 'user tidak ditemukan']);
-        }
-    }
 
     public function updateUser(Request $request, int $user_id)
     {

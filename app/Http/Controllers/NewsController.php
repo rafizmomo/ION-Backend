@@ -11,6 +11,7 @@ use App\Models\SubTopics;
 use App\Models\AdminNewsApproval;
 use App\Http\Controllers\Controller as Controller;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 // Eager: Join
 // Lazy: Not Join
@@ -146,6 +147,7 @@ class NewsController extends Controller
     public function showNewsByTopic($topic_slug)
     {
         DB::enableQueryLog();
+
         $topic = Topics::where("topic_slug", $topic_slug)->first();
         $join_news = News::join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
             ->select(
@@ -156,6 +158,9 @@ class NewsController extends Controller
             )
             ->where("sub_topics.topic_id", $topic->id)
             ->get();
+        if ($join_news->count() == 0) {
+            return abort(404, "test");
+        }
         return response($join_news, 200);
     }
     public function showNewsBySubTopicsAndTopics(string $sub_topic_slug)
@@ -192,7 +197,7 @@ class NewsController extends Controller
         return response()->json(["news" => $join_news, "topics" => $topic], 200);
     }
 
-    public function readingNews(int $topic_id, int $sub_topic_id, string $news_title)
+    public function readingNews(string $news_slug)
     {
         DB::enableQueryLog();
         $join_news = DB::table("news")
@@ -207,7 +212,7 @@ class NewsController extends Controller
                 "sub_topics.added_at as sub_topic_added_at",
                 "sub_topics.updated_at as sub_topic_updated_at"
             )
-            ->where([["sub_topics.topic_id", intval($topic_id)], ["news.sub_topic_id", intval($sub_topic_id)], ["news.news_title", strval($news_title)]])
+            ->where("news.news_slug", $news_slug)
             ->get();
         return response()->json($join_news, 200);
     }

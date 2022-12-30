@@ -36,7 +36,7 @@ Route::get("/token", function (Request $request) {
 // Route::put('/register/approve/{user_id}', [UserController::class, "approve"]);
 
 // Users
-Route::post("user/profile/{user_id}", [UserController::class, "updateUser"]); //update news
+Route::post("user/profile/{user_id}", [UserController::class, "updateUser"]); //update user
 Route::get("userprofile/{id}", [UserController::class, "userProfile"]);
 Route::post('/login/admin', [UserController::class, "loginAdmin"]);
 Route::post('/login/user', [UserController::class, "loginUser"]);

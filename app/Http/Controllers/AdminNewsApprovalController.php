@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use App\Models\AdminNewsApproval;
 use App\Models\SubTopics;
 use App\Models\User;
+use App\Models\News;
 
 class AdminNewsApprovalController extends Controller
 {
@@ -17,6 +18,8 @@ class AdminNewsApprovalController extends Controller
     {
         // $date_now = round(microtime(true) * 1000);
         $response = null;
+        $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $randomString = "";
         $image_file = $request->file("image_file");
         $file_name = $image_file->getClientOriginalName();
         $direct_file = $image_file->getClientOriginalName();
@@ -33,7 +36,15 @@ class AdminNewsApprovalController extends Controller
         ]);
         $news_data["news_title"] = $news_title;
         $news_data["news_content"] = $news_content;
-        $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title));
+
+        for ($i = 0; $i < 13; $i++) {
+            $index = rand(0, strlen($characters));
+            $randomString = $characters[$index];
+            if (News::where("news_slug", preg_replace("/\s+/", "-", strtolower($news_title) + '-' + $randomString))->first() != null) {
+                $randomString = $characters[$index];
+            }
+            $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title) + '-' + $randomString);
+        }
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
         }
