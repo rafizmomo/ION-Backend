@@ -9,7 +9,9 @@ use App\Models\News;
 use App\Models\Topics;
 use App\Models\SubTopics;
 use App\Models\AdminNewsApproval;
+use App\Models\User;
 use App\Http\Controllers\Controller as Controller;
+use App\Models\AdminApproval;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -40,19 +42,13 @@ class NewsController extends Controller
     //     return $test;
     //     dd(\DB::getQueryLog());
     // }
+
+    //Admin 
     public function index()
     {
-        $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_link")->where("role", "author")->get();
+        $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_lin")->where("role", "author")->get();
         return response()->json($news, 200);
     }
-    public function showNewsForAdminReview()
-    {
-        $news = DB::table("news")->join("authors", "authors.id", "=", "news.author_id")
-            // ->join("sub_topics", "sub_topics.id", "=", "news.sub_topic_id")
-            ->select("news.*", "authors.*")->get();
-        return response()->json($news, 200);
-    }
-
     public function searchNewsByNewsTitle()
     {
         $news = News::join("users", "users.id", "=", "news.user");
@@ -135,14 +131,12 @@ class NewsController extends Controller
         $json_encode = json_decode($id);
         return $json_encode[0]->id;
     }
-
     public function showNewsByTopics()
     {
         DB::enableQueryLog();
         $topics = Topics::with("news")->get();
         return response()->json($topics, 200);
     }
-
     // For home page in topic_home, visitor
     public function showNewsByTopic($topic_slug)
     {
@@ -159,7 +153,7 @@ class NewsController extends Controller
             ->where("sub_topics.topic_id", $topic->id)
             ->get();
         if ($join_news->count() == 0) {
-            return abort(404, "test");
+            return response(404, "test");
         }
         return response($join_news, 200);
     }
@@ -268,7 +262,6 @@ class NewsController extends Controller
         $update_news->update($data);
         return response()->json(["news" => $data, "status_code" => 200], 200);
     }
-
     public function delete(int $news_id)
     {
         $news = News::findOrFail($news_id);

@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Models\User;
-use Illuminate\Contracts\Support\Jsonable;
 
 class UserController extends Controller
 {
@@ -28,7 +26,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-        $user = User::create(["name" => $request->name, "email" => $request->email, 'password' => $request->password, "role" => "author"]);
+        $user = User::create(["name" => $request->name, "email" => $request->email, 'password' => $request->password, "role" => "admin"]);
         return response()->json([
             'message' => 'User successfully registered',
             'user' => $user
@@ -81,23 +79,27 @@ class UserController extends Controller
         ]);
         if ($validation->fails()) {
             return response()->json(['status' => "fail", "rule_error_messages" => $validation->errors()->toJson()], 400);
-        }
-        if (!(User::where(["email" => $email], ["password" => $password])->first())) {
-            return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["email" => ["Email is wrong"], "password" => ["Password is wrong"]])], 401);
-        } else if (!(User::where("email", $email)->first())) {
-            return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["email" => ["Email is wrong"]])], 401);
-        } else if (!(User::where("password", $password)->first())) {
-            return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["password" => ["Password is wrong"]])], 401);
         } else {
+            if (!(User::where(["email" => $email], ["password" => $password])->first())) {
+                return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["email" => ["Email is wrong"], "password" => ["Password is wrong"]])], 401);
+            }
+            if (!(User::where("email", $email)->first())) {
+                return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["email" => ["Email is wrong"]])], 401);
+            }
+            if (User::where("email", $email)->first()) {
+                $passwordfrom_record = User::where("email", $email)->first()->password;
+                if ($passwordfrom_record != $password) {
+                    return response()->json(['status' => "fail", "error_type" => "credential errors", "validation_messages" => json_encode(["password" => ["Password is wrong"]])], 401);
+                }
+            }
             if (User::where(['email' => $email, 'password' => $password])->first()) {
                 return response()->json(['status' => 'sukses', "user" => User::where(['email' => $email, 'password' => $password])->first()->id], 200);
             }
-        }
-        if (User::where(['email' => $email, 'password' => $password])->first() && User::where(['email' => $email, 'password' => $password])->first()->role == "admin") {
-            return response()->json(['status' => "fail", "error_type" => "admin is not authorized", "message" => "You are not authorized"], 401);
+            if (User::where(['email' => $email, 'password' => $password])->first() && User::where(['email' => $email, 'password' => $password])->first()->role == "admin") {
+                return response()->json(['status' => "fail", "error_type" => "admin is not authorized", "message" => "You are not authorized"], 401);
+            }
         }
     }
-
     // public function approve(Request $request, $user_id)
     // {
     //     DB::table('users')
@@ -106,7 +108,6 @@ class UserController extends Controller
     //             'role' => "author"
     //         ]);
     // }
-
     public function updateUser(Request $request, int $user_id)
     {
         $user = User::find($user_id);
@@ -148,10 +149,40 @@ class UserController extends Controller
         $user->update($data);
         return $validator->fails() ? $validator->errors()->toJson() : "";
     }
-
     public function userProfile($id)
     {
         $author = User::find(intval($id));
-        return response()->json([$author]);
+        return response()->json([$author], 202);
+    }
+
+    public function createAuthorReceivingAccount(Request $request, int $user_id)
+    {
+        $validator = Validator::make($request->all(), [
+            "account_number" => "required|numeric|digits_between:9,20"
+        ]);
+        if (!User::where("id", $user_id)->first()) {
+            return response("User is not found", 404);
+        }
+        if (User::where("id", $user_id)->first()) {
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), 422);
+            } else {
+                $user = User::find($user_id);
+                $user->update(["balance_account_number" => $request->account_number]);
+                return response("Your money receiving account has created", 202);
+            }
+        }
+    }
+    public function openPhotoProfile(int $user_id)
+    {
+        $user = User::find($user_id);
+        $header = array(
+            header("Content-Type: " . File::mimeType($user->photo_profile_path . "/" . $user->photo_profile_name)),
+            header(
+                "Content-Length: " . File::size($user->photo_profile_path . "/" . $user->photo_profile_name),
+            ),
+            header("Access-Control-Allow-Origin: *")
+        );
+        return readfile($user->photo_profile_path . "/" . $user->photo_profile_name);
     }
 }

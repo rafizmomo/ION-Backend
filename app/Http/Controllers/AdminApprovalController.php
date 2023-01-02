@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use App\Models\AdminApproval;
 use Illuminate\Support\Facades\File;
 
 class AdminApprovalController extends Controller
 {
-    public function makeApproval(Request $request, $id)
+
+    public function makeApproval(Request $request, $user_id)
     {
         $date_now = round(microtime(true) * 1000);
         $response = null;
@@ -28,11 +28,14 @@ class AdminApprovalController extends Controller
         ]);
         $author_data["author_description"] = $author_description;
         $author_data["join_at"] = $date_now;
-        $author_data["user_id"] = intval($id);
-        if ($validator->fails()) {
-            $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
+        $author_data["user_id"] = intval($user_id);
+        if (($validator->fails() && str_word_count($author_description, 0) <= 6)) {
+            $response = response()->json([
+                "status" => "Fail", "status_code" => 422, "message" => $validator->errors()->toJson(),
+                "author_description_less_words" => json_encode(["author_description" => "The author description must be at least 10 words"])
+            ], 422);
         } else {
-            if (AdminApproval::where("user_id", $id)->first() == null) {
+            if (!(AdminApproval::where("user_id", $user_id)->first())) {
                 $counter = 1;
                 $extension_test = File::extension($file_name);
                 $current_counter_file = $base_name . "_" . $counter  . "." . $extension_test;
@@ -54,16 +57,19 @@ class AdminApprovalController extends Controller
                 $author_data["photo_profile_link"] = $image_url_directory;
                 $author_data["photo_profile_name"] = $file_name;
                 $author_data["photo_profile_path"] = preg_replace("/\s+/", "", strtolower("storage/photo_profile"));
-                File::move($image_file, $directory . "/" . "photo_profile/" . $file_name);
-                AdminApproval::create($author_data);
-                $response = response()->json(["authors" => $author_data, "status" => "Success", "message" => "You have signigned to join as author. Please wait until you are approved"], 200);
+                File::copy($image_file, $directory . "/" . "photo_profile/" . $file_name);
+                try {
+                    AdminApproval::create($author_data);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    $response = response()->json(["message" => json_encode(["id" => [$e->getMessage()]])], 500);
+                }
+                $response = response()->json(["authors" => $author_data, "status" => "Success", "message" => "You have signigned to join as author. Please wait until you are approved"], 202);
             } else {
-                $response = response()->json(["authors" => $author_data, "status" => "Fail", "status_code" => 409, "message" => "You have joined as an author before"], 409);
+                return abort(409, "You have requested to join");
             }
         }
         return $response;
     }
-
     public function listAdminApproval()
     {
         $listdmin = DB::table("admin_approval")->join("users", "users.id", "=", "admin_approval.user_id")

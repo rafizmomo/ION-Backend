@@ -93,7 +93,6 @@ class AdminNewsApprovalController extends Controller
             ->get();
         return response()->json(["admin_news_approval" => $approval_list, "status_code" => 200], 200);
     }
-
     public function updateBalance(int $user_id)
     {
         DB::table('users')

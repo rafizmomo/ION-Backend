@@ -9,6 +9,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\SubTopicController;
 use App\Http\Controllers\AdminApprovalController;
 use App\Http\Controllers\AdminNewsApprovalController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 /*
@@ -35,9 +36,13 @@ Route::get("/token", function (Request $request) {
 
 // Route::put('/register/approve/{user_id}', [UserController::class, "approve"]);
 
-// Users
+// User Routes
 Route::post("user/profile/{user_id}", [UserController::class, "updateUser"]); //update user
+Route::post("user/author_balance_account/{user_id}", [UserController::class, "createAuthorReceivingAccount"]);
 Route::get("userprofile/{id}", [UserController::class, "userProfile"]);
+Route::get("userprofile/photo_profile/{id}", [UserController::class, "openPhotoProfile"]);
+
+// Authentication Routes
 Route::post('/login/admin', [UserController::class, "loginAdmin"]);
 Route::post('/login/user', [UserController::class, "loginUser"]);
 Route::post("user/register", [UserController::class, "register"]);
@@ -50,6 +55,7 @@ Route::get("news/topics/sub_topics/{sub_topic_slug}", [NewsController::class, "s
 Route::get("news/topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
 Route::get("news/topics/user/{id}", [NewsController::class, "showNewsByUserId"]);
 Route::get("news", [NewsController::class, "index"]);
+Route::get("/news/exists_or_not/{user_id}", [NewsController::class, "checkNewsExist"]);
 Route::post("news/{news_id}", [NewsController::class, "updateNews"]);
 Route::delete("news/{news_id}", [NewsController::class, "delete"]);
 
@@ -67,22 +73,23 @@ Route::get("/history/{id?}", [HistoryController::class, "index"]);
 Route::post("/history", [HistoryController::class, "store"]);
 Route::delete("/history/{id}", [HistoryController::class, "delete"]);
 
-
 Route::post("/logout", [AuthController::class, "signout"]);
+//Render Pages In Admin NewsDashboard
+Route::get("/rendercomponents/{user_id}", [Controller::class, "renderComponentsInAuthorNewsDashboard"]);
 
 // Admin Approval Routes
 Route::get("/adminapproval/author", [AdminApprovalController::class, "listAdminApproval"]);
-Route::post("/adminapproval/author/{id}", [AdminApprovalController::class, "makeApproval"]);
+Route::post("/adminapproval/author/{user_id}", [AdminApprovalController::class, "makeApproval"]);
 Route::prefix("adminapproval/author")->group(function () {
     route::post("/approve/{id}", [AuthorController::class, "approve"]);
-    route::post("reject/{id}", [AuthorController::class, "reject"]);
+    route::post("/reject/{id}", [AuthorController::class, "reject"]);
 });
 Route::get("/adminapproval/news", [AdminNewsApprovalController::class, "showAdminNewsApproval"]);
 Route::post("/adminapproval/news/{user_id}", [AdminNewsApprovalController::class, "makeApproval"]);
 Route::post("/adminapproval/news/balance/{user_id}", [AdminNewsApprovalController::class, "updateBalance"]);
 Route::prefix("adminapproval/news")->group(function () {
-    route::post("approve/{news_title}", [NewsController::class, "approve"]);
-    route::post("reject/{news_title}", [NewsController::class, "reject"]);
+    route::post("/approve/{news_title}", [NewsController::class, "approve"]);
+    route::post("/reject/{news_title}", [NewsController::class, "reject"]);
 });
 Route::middleware("auth:sanctum")->group(function () {
 });
