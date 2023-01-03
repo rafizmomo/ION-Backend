@@ -30,6 +30,25 @@ class SubTopicController extends Controller
         $subtopics = SubTopics::where("sub_topic_slug", $sub_topic_slug)->first();
         return response()->json(["sub_topics" => $subtopics, "status" => "Success", "message" => "Successfully sub topic"], 202);
     }
+    public function showSubTopicsByTopic(string $topic_slug)
+    {
+        $topic_id = Topics::where("topic_slug", $topic_slug)->first()->id;
+        if (SubTopics::where("topic_id", ($topic_id))) {
+            $sub_topic = SubTopics::where("topic_id", intval($topic_id))->get();
+            return response($sub_topic, 202);
+        } else {
+            return abort(404, "Sub topic is not found");
+        }
+    }
+
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function showById(int $id)
+    {
+        $subtopics = SubTopics::where("sub_topic_slug", intval($id))->first();
+        return response()->json(["sub_topics" => $subtopics, "status" => "Success", "message" => "Successfully sub topic"], 202);
+    }
 
     /**
      * @param \Illuminate\Http\Request @request

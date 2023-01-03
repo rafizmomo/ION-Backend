@@ -19,8 +19,7 @@ class AuthorController extends Controller
      */
     public function approve($id)
     {
-        $admin_approval_user = AdminApproval::where("user_id", intval($id))
-            ->select("id", "user_id", "author_description", "photo_profile_link", "photo_profile_name", "photo_profile_path")->get();
+        $admin_approval_user = AdminApproval::where("id", intval($id))->get();
         $json_decode_approval = json_decode($admin_approval_user);
         $id = $json_decode_approval[0]->id;
         $user_id_from_admin_approval = $json_decode_approval[0]->user_id;
@@ -28,12 +27,12 @@ class AuthorController extends Controller
         $user_photo_profile_name_from_admin_approval = $json_decode_approval[0]->photo_profile_name;
         $user_author_description_from_admin_approval = $json_decode_approval[0]->author_description;
         $directory = "storage/photo_profile";
-        $delete_admin_approval = AdminApproval::findOrFail($id);
+        $delete_admin_approval = AdminApproval::find($id);
         $create_author_role = User::find(intval($user_id_from_admin_approval));
         $data_author = array(
             "author_description" => $user_author_description_from_admin_approval,
             "role" => "author",
-            "photo_profile_link" => $admin_approval_user->value("photo_profile_link"),
+            "photo_profile_link" => $json_decode_approval[0]->photo_profile_link,
             "photo_profile_name" => $user_photo_profile_name_from_admin_approval,
             "photo_profile_path" => $user_photo_profile_path_from_admin_approval
         );

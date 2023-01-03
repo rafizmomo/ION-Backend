@@ -53,19 +53,24 @@ Route::get("news/topics", [NewsController::class, "showNewsByTopics"]);
 Route::get("news/topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
 Route::get("news/topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
 Route::get("news/topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
-Route::get("news/topics/user/{id}", [NewsController::class, "showNewsByUserId"]);
+Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);
 Route::get("news", [NewsController::class, "index"]);
 Route::get("/news/exists_or_not/{user_id}", [NewsController::class, "checkNewsExist"]);
+Route::get("news/openpicture/{news_id}", [NewsController::class, "openNewsPicture"]);
 Route::post("news/{news_id}", [NewsController::class, "updateNews"]);
 Route::delete("news/{news_id}", [NewsController::class, "delete"]);
 
+
 Route::get("/sub_topics", [SubTopicController::class, "index"]);
-Route::get("/sub_topics{sub_topic_slug}", [SubTopicController::class, "show"]);
+Route::get("/sub_topics/{sub_topic_slug}", [SubTopicController::class, "show"]);
+Route::get("/sub_topics/topic/{topic_slug}", [SubTopicController::class, "showSubTopicsByTopic"]);
+Route::get("/sub_topics/show_by_id/{id}", [SubTopicController::class, "showById"]);
 Route::post("/sub_topics", [SubTopicController::class, "store"]);
 Route::post("/sub_topics/{id}", [SubTopicController::class, "update"]);
 Route::delete("/sub_topics/{id}", [SubTopicController::class, "delete"]);
 Route::get("/topics", [TopicController::class, "index"]);
 Route::get("/topics/{topic_slug}", [TopicController::class, "show"]);
+Route::get("/topics/showbyid/{id}", [TopicController::class, "showById"]);
 Route::post("/topics", [TopicController::class, "save"]);
 Route::post("/topics/{id}", [TopicController::class, "update"]);
 Route::delete("/topics/{id}", [TopicController::class, "delete"]);
@@ -88,8 +93,8 @@ Route::get("/adminapproval/news", [AdminNewsApprovalController::class, "showAdmi
 Route::post("/adminapproval/news/{user_id}", [AdminNewsApprovalController::class, "makeApproval"]);
 Route::post("/adminapproval/news/balance/{user_id}", [AdminNewsApprovalController::class, "updateBalance"]);
 Route::prefix("adminapproval/news")->group(function () {
-    route::post("/approve/{news_title}", [NewsController::class, "approve"]);
-    route::post("/reject/{news_title}", [NewsController::class, "reject"]);
+    route::post("/approve/{approval_id}", [NewsController::class, "approve"]);
+    route::post("/reject/{approval_id}", [NewsController::class, "reject"]);
 });
 Route::middleware("auth:sanctum")->group(function () {
 });

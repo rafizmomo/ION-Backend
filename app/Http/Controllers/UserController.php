@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use App\Models\User;
+use App\Models\AdminApproval;
+use App\Models\News;
 
 class UserController extends Controller
 {
@@ -152,7 +154,8 @@ class UserController extends Controller
     public function userProfile($id)
     {
         $author = User::find(intval($id));
-        return response()->json([$author], 202);
+        $admin_approval = AdminApproval::where("user_id", $id)->first();
+        return response()->json(["author" => [$author], "admin_approval" => $admin_approval], 202);
     }
 
     public function createAuthorReceivingAccount(Request $request, int $user_id)
@@ -175,7 +178,7 @@ class UserController extends Controller
     }
     public function openPhotoProfile(int $user_id)
     {
-        $user = User::find($user_id);
+        $user = News::findOrFail($user_id);
         $header = array(
             header("Content-Type: " . File::mimeType($user->photo_profile_path . "/" . $user->photo_profile_name)),
             header(

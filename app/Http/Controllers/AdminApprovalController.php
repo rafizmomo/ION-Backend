@@ -31,8 +31,7 @@ class AdminApprovalController extends Controller
         $author_data["user_id"] = intval($user_id);
         if (($validator->fails() && str_word_count($author_description, 0) <= 6)) {
             $response = response()->json([
-                "status" => "Fail", "status_code" => 422, "message" => $validator->errors()->toJson(),
-                "author_description_less_words" => json_encode(["author_description" => "The author description must be at least 10 words"])
+                "status" => "Fail", "status_code" => 422, "message" => $validator->errors()->toJson()
             ], 422);
         } else {
             if (!(AdminApproval::where("user_id", $user_id)->first())) {

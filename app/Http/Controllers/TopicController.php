@@ -36,6 +36,12 @@ class TopicController extends Controller
         return response()->json(["topics" => $topics, "status" => "Success", "message" => "Succeed show topic"], 202);
     }
 
+    public function showById(int $id)
+    {
+        $topics = Topics::where("id", intval($id))->first();
+        return response()->json(["topics" => $topics, "status" => "Success", "message" => "Succeed show topic"], 202);
+    }
+
     /**
      * @param \Illuminate\Http\Request @request
      * @return \Illuminate\Http\Response 

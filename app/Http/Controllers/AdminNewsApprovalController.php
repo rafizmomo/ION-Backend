@@ -19,7 +19,6 @@ class AdminNewsApprovalController extends Controller
         // $date_now = round(microtime(true) * 1000);
         $response = null;
         $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        $randomString = "";
         $image_file = $request->file("image_file");
         $file_name = $image_file->getClientOriginalName();
         $direct_file = $image_file->getClientOriginalName();
@@ -32,23 +31,15 @@ class AdminNewsApprovalController extends Controller
             "news_title" => "required|unique:admin_news_approval",
             "news_content" => "required",
             "image_file" => "required|image:jpeg,png,jpg|max:5500",
-            "sub_topic_id" => "required|numeric"
+            "sub_topic_id" => "required"
         ]);
         $news_data["news_title"] = $news_title;
         $news_data["news_content"] = $news_content;
-
-        for ($i = 0; $i < 13; $i++) {
-            $index = rand(0, strlen($characters));
-            $randomString = $characters[$index];
-            if (News::where("news_slug", preg_replace("/\s+/", "-", strtolower($news_title) + '-' + $randomString))->first() != null) {
-                $randomString = $characters[$index];
-            }
-            $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title) + '-' + $randomString);
-        }
+        $news_data["news_slug"] = preg_replace("/\s+/", "-", strtolower($news_title)) . '-' . substr(md5(str_shuffle($characters)), 0, 10);
         if ($validator->fails()) {
             $response = response()->json(["status" => "Fail", "status_code" => 422, "message" => $validator->errors()], 422);
         }
-        if (!SubTopics::find($request->sub_topic_id) && !User::find($user_id)) {
+        if (!SubTopics::find($request->sub_topic_id) && !User::find(intval($user_id))) {
             return response()->json(["message" => "Sub topic is not found and user id is not found"], 404);
         } else {
             $counter = 1;

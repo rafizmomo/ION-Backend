@@ -46,7 +46,7 @@ class NewsController extends Controller
     //Admin 
     public function index()
     {
-        $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_lin")->where("role", "author")->get();
+        $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_link")->where("role", "author")->get();
         return response()->json($news, 200);
     }
     public function searchNewsByNewsTitle()
@@ -56,10 +56,10 @@ class NewsController extends Controller
     /**
      * @param \Illuminate\Http\Request $request
      */
-    public function approve($news_title)
+    public function approve(int $approval_id)
     {
         $date_now = round(microtime(true) * 1000);
-        $admin_approval = AdminNewsApproval::where("news_title", $news_title)->get();
+        $admin_approval = AdminNewsApproval::where("id", $approval_id)->get();
         $json_decode = json_decode($admin_approval);
         $news_new = null;
         $news_content = null;
@@ -70,7 +70,7 @@ class NewsController extends Controller
         $news_sub_topic_id = null;
         $user_id = null;
         $response = null;
-        if (AdminNewsApproval::where("news_title", $news_title)->first() != null) {
+        if (AdminNewsApproval::where("id", $approval_id)->first() != null) {
             $news_new = $json_decode[0]->news_title;
             $news_content = $json_decode[0]->news_content;
             $news_slug = $json_decode[0]->news_slug;
@@ -92,7 +92,7 @@ class NewsController extends Controller
                 $data["news_status"] = "Paid";
                 $data["sub_topic_id"] = $news_sub_topic_id;
                 $data["user_id"] = $user_id;
-                $delete_news_approval = AdminNewsApproval::where("news_title", $news_new);
+                $delete_news_approval = AdminNewsApproval::find($approval_id);
                 $delete_news_approval->delete();
                 News::create($data);
                 $response = response()->json(["approve_news" => $data, "status" => "Succes", "status_code" => 200], 200);
@@ -215,6 +215,20 @@ class NewsController extends Controller
     {
         $sub_topic = SubTopics::where("topic_id", $topic_id);
         return response()->json(["sub_topics" => $sub_topic, "status_code" => 200],);
+    }
+
+    public function openNewsPicture(int $news_id)
+    {
+        DB::enableQueryLog();
+        $news = News::find($news_id);
+        $header = array(
+            header("Content-Type: " . File::mimeType($news->news_picture_path . "/" . $news->news_picture_name)),
+            header(
+                "Content-Length: " . File::size($news->news_picture_path . "/" . $news->news_picture_name),
+            ),
+            header("Access-Control-Allow-Origin: *")
+        );
+        return readfile($news->news_picture_path . "/" . $news->news_picture_name);
     }
 
     public function updateNews(Request $request, int $news_id)
