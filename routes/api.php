@@ -52,7 +52,7 @@ Route::get("/authors", [UserController::class, "showAllAuthors"]);
 Route::get("news/topics", [NewsController::class, "showNewsByTopics"]);
 Route::get("news/topics/{topic_slug}", [NewsController::class, "showNewsByTopic"]); //Show news by a topic
 Route::get("news/topics/sub_topics/{sub_topic_slug}", [NewsController::class, "showNewsBySubTopicsAndTopics"]);
-Route::get("news/topics/{topic_id}/sub_topics/{sub_topic_id}/news/{news_title}", [NewsController::class, "readingNews"]);
+Route::get("news/topics/open_news/{news_slug}", [NewsController::class, "readingNews"]);
 Route::get("news/user/{id}", [NewsController::class, "showNewsByUserId"]);
 Route::get("news", [NewsController::class, "index"]);
 Route::get("/news/exists_or_not/{user_id}", [NewsController::class, "checkNewsExist"]);
@@ -68,6 +68,7 @@ Route::get("/sub_topics/show_by_id/{id}", [SubTopicController::class, "showById"
 Route::post("/sub_topics", [SubTopicController::class, "store"]);
 Route::post("/sub_topics/{id}", [SubTopicController::class, "update"]);
 Route::delete("/sub_topics/{id}", [SubTopicController::class, "delete"]);
+// Topics Route
 Route::get("/topics", [TopicController::class, "index"]);
 Route::get("/topics/{topic_slug}", [TopicController::class, "show"]);
 Route::get("/topics/showbyid/{id}", [TopicController::class, "showById"]);

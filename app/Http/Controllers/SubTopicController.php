@@ -33,7 +33,7 @@ class SubTopicController extends Controller
     public function showSubTopicsByTopic(string $topic_slug)
     {
         $topic_id = Topics::where("topic_slug", $topic_slug)->first()->id;
-        if (SubTopics::where("topic_id", ($topic_id))) {
+        if (SubTopics::where("topic_id", $topic_id)) {
             $sub_topic = SubTopics::where("topic_id", intval($topic_id))->get();
             return response($sub_topic, 202);
         } else {
