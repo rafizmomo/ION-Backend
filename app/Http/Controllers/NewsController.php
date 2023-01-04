@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\File;
 use App\Models\News;
 use App\Models\Topics;
@@ -49,9 +50,10 @@ class NewsController extends Controller
         $news = News::join("users", "users.id", "=", "news.user_id")->select("news.*", "users.id", "users.name", "users.photo_profile_link")->where("role", "author")->get();
         return response()->json($news, 200);
     }
-    public function searchNewsByNewsTitle()
+    public function searchNewsByNewsTitle($keywordparam)
     {
-        $news = News::join("users", "users.id", "=", "news.user");
+        $news = News::join("users", "users.id", "=", "news.user")->where("news_content", "like", str_replace("%", "", $keywordparam))->get();
+        return response()->json($news);
     }
     /**
      * @param \Illuminate\Http\Request $request
@@ -172,7 +174,6 @@ class NewsController extends Controller
             ->get();
         return response()->json($join_news, 200);
     }
-
     public function showNewsByUserId(int $id)
     {
         DB::enableQueryLog();
@@ -202,7 +203,6 @@ class NewsController extends Controller
         $topic = Topics::find($decode[0]->topic_id);
         return response()->json(["news" => $join_news, "topics" => $topic], 200);
     }
-
     public function readingNews(string $news_slug)
     {
         DB::enableQueryLog();
@@ -226,17 +226,15 @@ class NewsController extends Controller
         $topic = Topics::find($join_news->topic_id);
         return response()->json(["news" => $join_news, "topics" => $topic], 200);
     }
-
     public function getSubTopicByTopic(int $topic_id)
     {
         $sub_topic = SubTopics::where("topic_id", $topic_id);
         return response()->json(["sub_topics" => $sub_topic, "status_code" => 200],);
     }
-
-    public function openNewsPicture(int $news_id)
+    public function openNewsPicture($news_id)
     {
         DB::enableQueryLog();
-        $news = News::find($news_id);
+        $news = News::find(intval($news_id));
         $header = array(
             header("Content-Type: " . File::mimeType($news->news_picture_path . "/" . $news->news_picture_name)),
             header(
