@@ -30,8 +30,6 @@ class SubTopicController extends Controller
         $subtopics = SubTopics::where("sub_topic_slug", $sub_topic_slug)->first();
         return response()->json(["sub_topics" => $subtopics, "status" => "Success", "message" => "Successfully sub topic"], 202);
     }
-<<<<<<< HEAD
-=======
     public function showSubTopicsByTopic(string $topic_slug)
     {
         $topic_id = Topics::where("topic_slug", $topic_slug)->first()->id;
@@ -51,7 +49,6 @@ class SubTopicController extends Controller
         $subtopics = SubTopics::where("sub_topic_slug", intval($id))->first();
         return response()->json(["sub_topics" => $subtopics, "status" => "Success", "message" => "Successfully sub topic"], 202);
     }
->>>>>>> 1cfc130d46a1500ea4b4a796a8b398f1b05a59cb
 
     /**
      * @param \Illuminate\Http\Request @request
