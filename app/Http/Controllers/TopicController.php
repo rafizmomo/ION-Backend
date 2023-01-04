@@ -44,7 +44,7 @@ class TopicController extends Controller
 
     /**
      * @param \Illuminate\Http\Request @request
-     * @return \Illuminate\Http\Response 
+     * @return \Illuminate\Http\Response
      */
     function save(Request $request): JsonResponse
     {
@@ -91,13 +91,15 @@ class TopicController extends Controller
             $json_encode_topic_byid = json_encode(Topics::where("id", $id)->select("id", "topic_title")->get());
             $json_decode_topic_byid =  json_decode($json_encode_topic_byid)[0]->id;
             if ($id == $json_decode_id && $json_decode_topic_title == $topic_title_capitalize) {
-                $topic_update->update($array_update);
+                $topic_update->fill($array_update);
+                $topic_update->save();
                 $response = response()->json(["topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Succedd to update"], 200);
             } else if ($id == $json_decode_topic_byid && $this->TopicWithCondition("topic_title", $topic_title_capitalize)->get() != null) {
                 $response =  response()->json(["topics" => $array_update, "status" => "Fail", "status_code" => 409, "message" => "Failed to update"], 409);
             }
         } else {
-            $topic_update->update($array_update);
+            $topic_update->fill($array_update);
+            $topic_update->save();
             $response = response()->json(["topics" => $array_update, "status" => "Success", "status_code" => 200, "message" => "Succeed to update"], 200);
         }
         return $response;
